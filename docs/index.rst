@@ -15,6 +15,7 @@ CLeaning to Analysis: Reproducibility-based Interface for Traits and Exposures
    CLARITE GUI Github Repo <https://github.com/HallLab/clarite-gui>
    motivation
    installation
+   citation
    usage
 
 
