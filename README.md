@@ -6,9 +6,11 @@ A GUI Version of CLARITE
 
 ![alt text][logo]
 
-[logo]: src/main/resources/base/images/clarite_logo.png "CLARITE Logo"
+[logo]: gui/resources/images/clarite_logo.png "CLARITE Logo"
 
 Full documentation on [ReadTheDocs.io](https://clarite-gui.readthedocs.io/en/stable/)
+
+*NOTE*: Update resources with `pyrcc -o gui/resources/app_resources.py gui/resources/app_resources.qrc`
 
 ## Install
 
