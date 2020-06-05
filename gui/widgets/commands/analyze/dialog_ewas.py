@@ -15,7 +15,7 @@ class EWASDialog(QDialog):
     """
 
     COV_METHOD_OPTIONS = ["stata", "jackknife"]
-    SINGLE_CLUSTER_OPTIONS = ["error", "scaled", "centered", "certainty"]
+    SINGLE_CLUSTER_OPTIONS = ["fail", "adjust", "average", "certainty"]
     WEIGHT_TYPES = ['None', 'Single Weight', 'Specific Weights']
 
     def __init__(self, *args, **kwargs):
@@ -403,7 +403,8 @@ class EWASDialog(QDialog):
         # Check that some variables/weights matched
         unique_vars = len(set(weights.keys()) & set(list(self.dataset.df)))
         unique_weights = len(set(weights.values()) & set(list(self.survey_df.df)))
-        missing_weights = set(list(self.dataset.df)) - set(weights.keys())
+        missing_weights = set(list(self.dataset.df)) - set(weights.keys()) - set(weights.values()) -\
+                          set(self.covariates) - {self.phenotype, self.cluster, self.strata, self.fpc}
         if unique_vars < 1:
             show_warning("Specific Weights File Error",
                          f"Loaded {filename}\n"

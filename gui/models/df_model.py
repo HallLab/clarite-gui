@@ -1,5 +1,5 @@
 import clarite
-import pandas as pd
+import numpy as np
 from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSlot, QSettings
 from PyQt5.QtGui import QFont, QColor
@@ -156,7 +156,7 @@ class PandasDFModel(QtCore.QAbstractTableModel):
             row_idx = index.row()
             col_idx = index.column()
             value = self.dataset.df.iloc[row_idx, col_idx]
-            if type(value) is pd.np.float64:
+            if type(value) is np.float64:
                 return f"{value:.{self.data_float_precision}E}"
             else:
                 return str(value)
