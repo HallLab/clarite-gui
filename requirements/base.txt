@@ -1,2 +1,2 @@
-clarite==0.9.1
-PyQT5==5.12
+clarite==1.0.0
+PyQT5==5.15
