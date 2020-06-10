@@ -29,6 +29,12 @@ Requires Python v3.6 or higher
 
         conda install pyqt
         pip install clarite
+        
+## Run
+
+After activating the environment:
+
+        python main.py
 
 ## Citing CLARITE
 
