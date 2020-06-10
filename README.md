@@ -12,55 +12,23 @@ Full documentation on [ReadTheDocs.io](https://clarite-gui.readthedocs.io/en/sta
 
 *NOTE*: Update resources with `pyrcc -o gui/resources/app_resources.py gui/resources/app_resources.qrc`
 
-## Install
+## Install using Conda
 
-Requires Python v3.6
+Requires Python v3.6 or higher
 
-1. Download the repository and navigate to the main folder
-2. Create a python venv
-
-        python -m venv venv
+1. Create a conda environment
     
-3. Activate the environment
-
-    On Mac/Linux:
-
-        source venv/bin/activate
-
-    On Windows:
-
-        call venv\scripts\activate.bat
+       conda create -n clarite-gui python=3.7
     
-4. Install the requirements
+2. (OSX Only) - Install numpy and (assuming you are using homebrew) install omp
 
-    On Mac/Linux:
+       conda install numpy
+       brew install libomp
+       
+3.  Install requirements
 
-        source src\requirements\base.txt
-
-    On Windows:
-
-        pip install -r src\requirements\windows.txt
-
-
-## Running
-
-1. Activate the environment (if not already activated)
-
-    On Mac/Linux:
-
-        source venv/bin/activate
-
-    On Windows:
-
-        call venv\scripts\activate.bat
-
-2. Run
-
-        fbs run
-
-## Creating an executable (currently not working)
-
-    python -m fbs freeze
+        conda install pyqt
+        pip install clarite
 
 ## Citing CLARITE
 
