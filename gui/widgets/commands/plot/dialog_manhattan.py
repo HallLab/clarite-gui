@@ -2,7 +2,8 @@ import clarite
 import pandas as pd
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QDialog, QLabel, QFormLayout, QDialogButtonBox, QHBoxLayout, \
-    QVBoxLayout, QPushButton, QGroupBox, QListWidget, QAbstractItemView, QFileDialog, QSpinBox
+    QVBoxLayout, QPushButton, QGroupBox, QListWidget, QAbstractItemView, QFileDialog, QSpinBox, QComboBox, QCheckBox, \
+    QDoubleSpinBox, QWidget
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg as FigureCanvas,
                                                 NavigationToolbar2QT as NavigationToolbar)
 from matplotlib.figure import Figure
@@ -15,11 +16,19 @@ class ManhattanPlotDialog(QDialog):
     """
     This dialog controls settings for plotting a manhattan plot and displays it
     """
+
+    PVALUE_TYPES = ["Raw", "Bonferroni", "FDR"]
+
     def __init__(self, *args, **kwargs):
         super(ManhattanPlotDialog, self).__init__(*args, **kwargs)
         self.appctx = self.parent().appctx
         self.datasets = dict()
         self.variables = []
+        self.pvalue_type = self.PVALUE_TYPES[0]
+        self.cutoff_bonferroni_enabled = True
+        self.cutoff_bonferroni_value = 0.05
+        self.cutoff_fdr_enabled = False
+        self.cutoff_fdr_value = 0.05
         self.categories = dict()
         self.label_top_n = 3
         self.label_specific = None
@@ -66,6 +75,49 @@ class ManhattanPlotDialog(QDialog):
 
         left_layout.addRow(QHLine())
 
+        # Pvalue Type
+        self.pvalue_type_combobox = QComboBox(self)
+        for option in self.PVALUE_TYPES:
+            self.pvalue_type_combobox.addItem(option)
+        self.pvalue_type_combobox.currentIndexChanged.connect(lambda idx: self.update_pvalue_type(idx))
+        left_layout.addRow("Pvalue Type", self.pvalue_type_combobox)
+
+        # Bonferroni Cutoff
+        self.cutoff_bonferroni_widget = QWidget(parent=self)
+        cutoff_bonferroni_layout = QHBoxLayout()
+        self.cutoff_bonferroni_cb = QCheckBox(self)
+        self.cutoff_bonferroni_cb.setChecked(self.cutoff_bonferroni_enabled)
+        self.cutoff_bonferroni_cb.stateChanged.connect(self.update_cutoffs)
+        cutoff_bonferroni_layout.addWidget(self.cutoff_bonferroni_cb)
+        cutoff_bonferroni_layout.addWidget(QLabel("Bonferroni Cutoff"))
+        self.cutoff_bonferroni_sb = QDoubleSpinBox(self)
+        self.cutoff_bonferroni_sb.setValue(self.cutoff_bonferroni_value)
+        self.cutoff_bonferroni_sb.setSingleStep(0.001)
+        self.cutoff_bonferroni_sb.setDecimals(3)
+        self.cutoff_bonferroni_sb.setRange(0, 1)
+        self.cutoff_bonferroni_sb.valueChanged.connect(self.update_bonferroni_cutoff_value)
+        cutoff_bonferroni_layout.addWidget(self.cutoff_bonferroni_sb)
+        self.cutoff_bonferroni_widget.setLayout(cutoff_bonferroni_layout)
+        left_layout.addRow(self.cutoff_bonferroni_widget)
+
+        # FDR Cutoff
+        self.cutoff_fdr_widget = QWidget(parent=self)
+        cutoff_fdr_layout = QHBoxLayout()
+        self.cutoff_fdr_cb = QCheckBox(self)
+        self.cutoff_fdr_cb.setChecked(self.cutoff_fdr_enabled)
+        self.cutoff_fdr_cb.stateChanged.connect(self.update_cutoffs)
+        cutoff_fdr_layout.addWidget(self.cutoff_fdr_cb)
+        cutoff_fdr_layout.addWidget(QLabel("FDR Cutoff"))
+        self.cutoff_fdr_sb = QDoubleSpinBox(self)
+        self.cutoff_fdr_sb.setValue(self.cutoff_fdr_value)
+        self.cutoff_fdr_sb.setSingleStep(0.001)
+        self.cutoff_fdr_sb.setDecimals(3)
+        self.cutoff_fdr_sb.setRange(0, 1)
+        self.cutoff_fdr_sb.valueChanged.connect(self.update_fdr_cutoff_value)
+        cutoff_fdr_layout.addWidget(self.cutoff_fdr_sb)
+        self.cutoff_fdr_widget.setLayout(cutoff_fdr_layout)
+        left_layout.addRow(self.cutoff_fdr_widget)
+
         # Categories - Loaded from a file
         self.category_file_btn = QPushButton("Not Set", parent=self)
         self.category_file_btn.clicked.connect(self.launch_get_category_file)
@@ -110,7 +162,7 @@ class ManhattanPlotDialog(QDialog):
         # Update variables
         variables = set()
         for df in self.datasets.values():
-            variables = variables | set(df.index.get_level_values('variable'))
+            variables = variables | set(df.index.get_level_values('Variable'))
         self.variables = list(variables)
 
         # Update label listing how many datasets are selected
@@ -138,6 +190,57 @@ class ManhattanPlotDialog(QDialog):
                                figure=self.canvas.figure
                                )
         self.canvas.draw()
+
+    @pyqtSlot(int)
+    def update_pvalue_type(self, idx):
+        self.pvalue_type = self.PVALUE_TYPES[idx]
+        self.update_cutoffs()
+
+    @pyqtSlot(float)
+    def update_bonferroni_cutoff_value(self, v):
+        self.cutoff_bonferroni_value = v
+        self.update_cutoffs()
+
+    @pyqtSlot(float)
+    def update_fdr_cutoff_value(self, v):
+        self.cutoff_fdr_value = v
+        self.update_cutoffs()
+
+    def update_cutoffs(self):
+        if self.pvalue_type == "Bonferroni":
+            # Enable Bonferroni
+            self.cutoff_bonferroni_cb.setEnabled(True)
+            self.cutoff_bonferroni_sb.setEnabled(True)
+            # Uncheck and Disable FDR
+            self.cutoff_fdr_cb.setChecked(False)
+            self.cutoff_fdr_cb.setEnabled(False)
+            self.cutoff_fdr_sb.setEnabled(False)
+        elif self.pvalue_type == "FDR":
+            # Uncheck and Disable Bonferroni
+            self.cutoff_bonferroni_cb.setChecked(False)
+            self.cutoff_bonferroni_cb.setEnabled(False)
+            self.cutoff_bonferroni_sb.setEnabled(False)
+            # Enable FDR
+            self.cutoff_fdr_cb.setEnabled(True)
+            self.cutoff_fdr_sb.setEnabled(True)
+        elif self.pvalue_type == "Raw":
+            # Enable both
+            self.cutoff_bonferroni_cb.setEnabled(True)
+            self.cutoff_bonferroni_sb.setEnabled(True)
+            self.cutoff_fdr_cb.setEnabled(True)
+            self.cutoff_fdr_sb.setEnabled(True)
+
+        # Enable/Disable Bonferroni
+        self.cutoff_bonferroni_enabled = self.cutoff_bonferroni_cb.isChecked()
+        self.cutoff_bonferroni_sb.setEnabled(self.cutoff_bonferroni_enabled)
+        # Enable/Disable FDR
+        self.cutoff_fdr_enabled = self.cutoff_fdr_cb.isChecked()
+        self.cutoff_fdr_sb.setEnabled(self.cutoff_fdr_enabled)
+        # Update
+        print("Updated cutoffs:"
+              f"Bonferroni: {self.cutoff_bonferroni_enabled} for {self.cutoff_bonferroni_value}"
+              f"FDR: {self.cutoff_fdr_enabled} for {self.cutoff_fdr_value}"
+              )
 
     def launch_get_category_file(self):
         """Launch a dialog to load a file which specified categories for each variable"""
