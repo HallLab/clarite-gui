@@ -35,6 +35,7 @@ class EWASDialog(QDialog):
         self.nest = True
         self.weights = None
         self.single_cluster = self.SINGLE_CLUSTER_OPTIONS[0]
+        self.drop_unweighted = False
         # Setup UI
         self.setup_ui()
 
@@ -60,7 +61,8 @@ class EWASDialog(QDialog):
                                                   nest=self.nest,
                                                   fpc=self.fpc,
                                                   weights=self.weights,
-                                                  single_cluster=self.single_cluster)
+                                                  single_cluster=self.single_cluster,
+                                                  drop_unweighted=self.drop_unweighted)
         else:
             sds = None
 
@@ -88,7 +90,8 @@ class EWASDialog(QDialog):
                                    f"nest={repr(self.nest)}, "
                                    f"fpc={repr(self.fpc)}, "
                                    f"weights={repr(self.weights)}, "
-                                   f"single_cluster={repr(self.single_cluster)})")
+                                   f"single_cluster={repr(self.single_cluster)},"
+                                   f"drop_unweighted={repr(self.drop_unweighted)})")
         else:
             sds_name = None
         # Log EWAS
@@ -192,6 +195,12 @@ class EWASDialog(QDialog):
         self.weight_specific_btn.clicked.connect(self.launch_get_weight_specific)
         self.weight_specific_btn.setEnabled(False)  # Disabled b/c weight type is None by default
         survey_setting_layout.addRow("\tSpecific Weight", self.weight_specific_btn)
+
+        # Drop Unweighted
+        self.drop_unweighted_checkbox = QCheckBox(self)
+        self.drop_unweighted_checkbox.setChecked(False)
+        self.drop_unweighted_checkbox.stateChanged.connect(self.update_drop_unweighted)
+        survey_setting_layout.addRow("Drop unweighted observations", self.drop_unweighted_checkbox)
 
         # Single Cluster Dropdown
         self.single_cluster_combobox = QComboBox(self)
@@ -412,6 +421,10 @@ class EWASDialog(QDialog):
             self.weights = weights
             self.weight_specific_btn.setText(f"{unique_weights:,} different weights "
                                              f"assigned to {unique_vars:,} variables")
+            
+    def update_drop_unweighted(self):
+        """Update the nest parameter to match the checkbox"""
+        self.drop_unweighted = self.drop_unweighted_checkbox.isChecked()
 
     @pyqtSlot(int)
     def update_single_cluster(self, idx):
