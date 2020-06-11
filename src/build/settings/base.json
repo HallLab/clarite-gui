@@ -1,7 +1,0 @@
-{
-    "app_name": "CLARITE GUI",
-    "author": "Hall Lab",
-    "main_module": "src/main/python/clarite_gui/main.py",
-    "version": "1.0.0",
-    "hidden_imports": ["statsmodels"]
-}
