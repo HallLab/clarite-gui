@@ -12,29 +12,18 @@ Full documentation on [ReadTheDocs.io](https://clarite-gui.readthedocs.io/en/sta
 
 *NOTE*: Update resources with `pyrcc -o gui/resources/app_resources.py gui/resources/app_resources.qrc`
 
-## Install using Conda
+## Running
 
-Requires Python v3.6 or higher
+1. Download or clone this repository and enter the folder
+2. Ensure pipenv is installed
 
-1. Create a conda environment
-    
-       conda create -n clarite-gui python=3.7
-    
-2. (OSX Only) - Install numpy and (assuming you are using homebrew) install omp
+    ``pip install pipenv``
 
-       conda install numpy
-       brew install libomp
-       
-3.  Install requirements
+3. Run:
 
-        conda install pyqt
-        pip install clarite
-        
-## Run
+    ``pipenv run python main.py``
 
-After activating the environment:
-
-        python main.py
+Executables will be provided for future releases.
 
 ## Citing CLARITE
 
