@@ -19,7 +19,11 @@ Full documentation on [ReadTheDocs.io](https://clarite-gui.readthedocs.io/en/sta
 
     ``pip install pipenv``
 
-3. Run:
+3. Create/update the pipenv
+
+    ``pipenv update``
+
+4. Run:
 
     ``pipenv run python main.py``
 
