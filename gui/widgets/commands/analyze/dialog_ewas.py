@@ -14,7 +14,6 @@ class EWASDialog(QDialog):
     This dialog allows sets settings for EWAS
     """
 
-    COV_METHOD_OPTIONS = ["stata", "jackknife"]
     SINGLE_CLUSTER_OPTIONS = ["fail", "adjust", "average", "certainty"]
     WEIGHT_TYPES = ['None', 'Single Weight', 'Specific Weights']
 
@@ -29,7 +28,6 @@ class EWASDialog(QDialog):
         self.min_n = 200
         self.use_survey = False
         # Survey Params
-        self.cov_method = self.COV_METHOD_OPTIONS[0]
         self.survey_df = None
         self.strata = None
         self.cluster = None
@@ -63,17 +61,14 @@ class EWASDialog(QDialog):
                                                   fpc=self.fpc,
                                                   weights=self.weights,
                                                   single_cluster=self.single_cluster)
-            cov_method = self.cov_method
         else:
             sds = None
-            cov_method = None
 
         def f():
             result = clarite.analyze.ewas(phenotype=phenotype,
                                           covariates=covariates,
                                           data=data,
                                           survey_design_spec=sds,
-                                          cov_method=cov_method,
                                           min_n=min_n)
             return Dataset(data_name, 'ewas_result', result)
 
@@ -94,17 +89,14 @@ class EWASDialog(QDialog):
                                    f"fpc={repr(self.fpc)}, "
                                    f"weights={repr(self.weights)}, "
                                    f"single_cluster={repr(self.single_cluster)})")
-            cov_method = repr(self.cov_method)
         else:
             sds_name = None
-            cov_method = None
         # Log EWAS
         self.appctx.log_python(f"{new_data_name} = clarite.analyze.ewas("
                                f"phenotype={repr(self.phenotype)}, "
                                f"covariates={repr(self.covariates)}, "
                                f"data={old_data_name}, "
                                f"survey_design_spec={repr(sds_name)}, "
-                               f"cov_method={repr(cov_method)}, "
                                f"min_n={self.min_n})")
 
     def setup_ui(self):
@@ -153,13 +145,6 @@ class EWASDialog(QDialog):
         survey_setting_layout = QFormLayout()
         self.survey_setting_group.setLayout(survey_setting_layout)
         layout.addRow(self.survey_setting_group)
-
-        # Covariance Method Dropdown
-        self.cov_method_combobox = QComboBox(self)
-        for option in self.COV_METHOD_OPTIONS:
-            self.cov_method_combobox.addItem(option)
-        self.cov_method_combobox.currentIndexChanged.connect(lambda idx: self.update_cov_method(idx))
-        survey_setting_layout.addRow("Covariance Method", self.cov_method_combobox)
 
         # Survey df - select a dataset that has been loaded
         self.survey_df_combobox = QComboBox(self)
@@ -215,7 +200,7 @@ class EWASDialog(QDialog):
         self.single_cluster_combobox.currentIndexChanged.connect(lambda idx: self.update_single_cluster(idx))
         survey_setting_layout.addRow("Single Cluster Handling", self.single_cluster_combobox)
 
-        # Ok/Cancel       
+        # Ok/Cancel
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
 
         self.buttonBox = QDialogButtonBox(QBtn)
@@ -286,10 +271,6 @@ class EWASDialog(QDialog):
         self.use_survey = self.use_survey_checkbox.isChecked()
         self.survey_setting_group.setHidden(not self.use_survey)
         self.adjustSize()
-
-    @pyqtSlot(int)
-    def update_cov_method(self, idx):
-        self.cov_method = self.COV_METHOD_OPTIONS[idx]
 
     @pyqtSlot(int)
     def update_survey_df(self, idx):
