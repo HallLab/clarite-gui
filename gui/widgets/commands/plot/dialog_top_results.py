@@ -170,7 +170,6 @@ class TopResultsPlotDialog(QDialog):
             self.update_plot_btn.setEnabled(False)
         else:
             self.update_plot_btn.setEnabled(True)
-            print(selected_idx, type(selected_idx))
             selected_dataset = self.appctx.datasets[self.dataset_map[selected_idx[0]]]
             self.dataset = selected_dataset
 
