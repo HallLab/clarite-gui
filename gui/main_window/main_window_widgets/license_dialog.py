@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QLabel, QTextEdit
+from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QLabel, QTextBrowser
 
 
 class LicenseDialog(QDialog):
@@ -20,9 +20,8 @@ class LicenseDialog(QDialog):
         layout = QVBoxLayout()
 
         layout.addWidget(QLabel("The CLARITE GUI is licensed under the GPLv3 license:"))
-        license_text = QTextEdit()
+        license_text = QTextBrowser()
         license_text.setText(LICENSE)
-        license_text.setReadOnly(True)
         layout.addWidget(license_text)
 
         # Ok/Cancel
