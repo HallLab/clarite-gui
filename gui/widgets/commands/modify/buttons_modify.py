@@ -7,6 +7,7 @@ from .dialog_colfilter import ColfilterDialog
 from .dialog_colfilter_mincatn import ColfilterMinCatN
 from .dialog_colfilter_minn import ColfilterMinN
 from .dialog_colfilter_pzero import ColfilterPZeroDialog
+from .dialog_drop_extra_cat import DropExtraCatDialog
 from .dialog_make_type import MakeTypeDialog
 from .dialog_merge_obs import MergeObsDialog
 from .dialog_merge_vars import MergeVarsDialog
@@ -57,6 +58,7 @@ class ModifyButtons(QWidget):
         layout.addWidget(QHLine())
         self.add_button("Recode Values", RecodeValuesDialog, layout)
         self.add_button("Remove Outliers", RemoveOutliersDialog, layout)
+        self.add_button("Drop Extra Categories", DropExtraCatDialog, layout)
         layout.addWidget(QHLine())
         self.add_button("Rowfilter", RowfilterDialog, layout)
         self.add_button("Rowfilter Incomplete Obs", RowfilterIncompleteDialog, layout)
