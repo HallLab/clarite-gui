@@ -145,7 +145,7 @@ class ManhattanPlotDialog(QDialog):
 
         # Ok/Cancel       
         QBtn = QDialogButtonBox.Close
-        
+
         self.buttonBox = QDialogButtonBox(QBtn)
         right_layout.addWidget(self.buttonBox)
         self.buttonBox.rejected.connect(self.reject)
@@ -183,12 +183,38 @@ class ManhattanPlotDialog(QDialog):
 
     def update_canvas(self):
         self.canvas.figure.clear()
-        clarite.plot.manhattan(dfs=self.datasets,
-                               categories=self.categories,
-                               num_labeled=self.label_top_n,
-                               label_vars=[self.label_specific],
-                               figure=self.canvas.figure
-                               )
+        # Cutoff lines
+        if self.cutoff_bonferroni_enabled:
+            bonferroni = self.cutoff_bonferroni_value
+        else:
+            bonferroni = None
+        if self.cutoff_fdr_enabled:
+            fdr = self.cutoff_fdr_value
+        else:
+            fdr = None
+        # Plot by type
+        if self.pvalue_type == "Raw":
+            clarite.plot.manhattan(dfs=self.datasets,
+                                   categories=self.categories,
+                                   bonferroni=bonferroni,
+                                   fdr=fdr,
+                                   num_labeled=self.label_top_n,
+                                   label_vars=[self.label_specific],
+                                   figure=self.canvas.figure)
+        elif self.pvalue_type == "Bonferroni":
+            clarite.plot.manhattan_bonferroni(dfs=self.datasets,
+                                              categories=self.categories,
+                                              cutoff=bonferroni,
+                                              num_labeled=self.label_top_n,
+                                              label_vars=[self.label_specific],
+                                              figure=self.canvas.figure)
+        elif self.pvalue_type == "FDR":
+            clarite.plot.manhattan_fdr(dfs=self.datasets,
+                                       categories=self.categories,
+                                       cutoff=fdr,
+                                       num_labeled=self.label_top_n,
+                                       label_vars=[self.label_specific],
+                                       figure=self.canvas.figure)
         self.canvas.draw()
 
     @pyqtSlot(int)
@@ -236,11 +262,6 @@ class ManhattanPlotDialog(QDialog):
         # Enable/Disable FDR
         self.cutoff_fdr_enabled = self.cutoff_fdr_cb.isChecked()
         self.cutoff_fdr_sb.setEnabled(self.cutoff_fdr_enabled)
-        # Update
-        print("Updated cutoffs:"
-              f"Bonferroni: {self.cutoff_bonferroni_enabled} for {self.cutoff_bonferroni_value}"
-              f"FDR: {self.cutoff_fdr_enabled} for {self.cutoff_fdr_value}"
-              )
 
     def launch_get_category_file(self):
         """Launch a dialog to load a file which specified categories for each variable"""
@@ -264,7 +285,8 @@ class ManhattanPlotDialog(QDialog):
 
         # Must have two columns
         if len(list(categories)) != 2:
-            show_warning("Variable Categories File Error", f"Expected 2 columns, found {len(list(categories)):,} columns")
+            show_warning("Variable Categories File Error",
+                         f"Expected 2 columns, found {len(list(categories)):,} columns")
             return
 
         # Set columns and convert to a dictionary
@@ -282,8 +304,8 @@ class ManhattanPlotDialog(QDialog):
     def launch_get_specific(self):
         """Launch a dialog to select a specific variable for labeling"""
         specific = SelectColumnDialog.get_column(columns=self.variables,
-                                                  selected=self.label_specific,
-                                                  parent=self)
+                                                 selected=self.label_specific,
+                                                 parent=self)
         if specific is not None:
             self.label_specific = specific
             self.label_specific_btn.setText(f"{self.label_specific}")
