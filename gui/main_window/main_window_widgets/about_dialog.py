@@ -3,9 +3,10 @@ import webbrowser
 import clarite
 from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QLabel, QFormLayout, QPushButton, QHBoxLayout
+from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QLabel, QFormLayout, QPushButton, QHBoxLayout, \
+    QTextBrowser
 
-from gui.resources import app_resources
+from gui.widgets.utilities import QHLine
 
 
 class AboutDialog(QDialog):
@@ -56,6 +57,15 @@ class AboutDialog(QDialog):
         self.button.setFixedSize(64, 64)
         bottom_layout.addWidget(self.button)
 
+        layout.addWidget(QHLine())
+
+        # Citations
+        layout.addWidget(QLabel("Citing CLARITE:"))
+        citations_text = QTextBrowser()
+        citations_text.setOpenExternalLinks(True)
+        citations_text.setText(CITATION_TEXT)
+        layout.addWidget(citations_text)
+
         # Ok/Cancel
         QBtn = QDialogButtonBox.Ok
 
@@ -68,3 +78,24 @@ class AboutDialog(QDialog):
 
     def open_site(self, site):
         webbrowser.open(site)
+
+
+CITATIONS = []
+
+# 1
+CITATIONS.append(
+    'Lucas AM, et al (2019)'
+    '<a href="https://www.frontiersin.org/article/10.3389/fgene.2019.01240" style="text-decoration: none;">'
+    '"CLARITE facilitates the quality control and analysis process for EWAS of metabolic-related traits."</a> '
+    '<i>Frontiers in Genetics</i>: 10, 1240'
+)
+# 2
+CITATIONS.append(
+    'Passero K, et al (2020)'
+    '<a href="https://www.worldscientific.com/doi/abs/10.1142/9789811215636_0058" style="text-decoration: none;">'
+    '"Phenome-wide association studies on cardiovascular health and fatty acids considering phenotype quality control'
+    ' practices for epidemiological data."</a>'
+    '<i>Pacific Symposium on Biocomputing</i>: 25, 659'
+)
+
+CITATION_TEXT = f"<ol>{''.join([f'<li>{c}</li>' for c in CITATIONS])}</ol>"

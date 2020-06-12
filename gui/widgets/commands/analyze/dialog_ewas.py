@@ -14,7 +14,6 @@ class EWASDialog(QDialog):
     This dialog allows sets settings for EWAS
     """
 
-    COV_METHOD_OPTIONS = ["stata", "jackknife"]
     SINGLE_CLUSTER_OPTIONS = ["fail", "adjust", "average", "certainty"]
     WEIGHT_TYPES = ['None', 'Single Weight', 'Specific Weights']
 
@@ -29,7 +28,6 @@ class EWASDialog(QDialog):
         self.min_n = 200
         self.use_survey = False
         # Survey Params
-        self.cov_method = self.COV_METHOD_OPTIONS[0]
         self.survey_df = None
         self.strata = None
         self.cluster = None
@@ -37,6 +35,7 @@ class EWASDialog(QDialog):
         self.nest = True
         self.weights = None
         self.single_cluster = self.SINGLE_CLUSTER_OPTIONS[0]
+        self.drop_unweighted = False
         # Setup UI
         self.setup_ui()
 
@@ -62,18 +61,16 @@ class EWASDialog(QDialog):
                                                   nest=self.nest,
                                                   fpc=self.fpc,
                                                   weights=self.weights,
-                                                  single_cluster=self.single_cluster)
-            cov_method = self.cov_method
+                                                  single_cluster=self.single_cluster,
+                                                  drop_unweighted=self.drop_unweighted)
         else:
             sds = None
-            cov_method = None
 
         def f():
             result = clarite.analyze.ewas(phenotype=phenotype,
                                           covariates=covariates,
                                           data=data,
                                           survey_design_spec=sds,
-                                          cov_method=cov_method,
                                           min_n=min_n)
             return Dataset(data_name, 'ewas_result', result)
 
@@ -93,18 +90,16 @@ class EWASDialog(QDialog):
                                    f"nest={repr(self.nest)}, "
                                    f"fpc={repr(self.fpc)}, "
                                    f"weights={repr(self.weights)}, "
-                                   f"single_cluster={repr(self.single_cluster)})")
-            cov_method = repr(self.cov_method)
+                                   f"single_cluster={repr(self.single_cluster)},"
+                                   f"drop_unweighted={repr(self.drop_unweighted)})")
         else:
             sds_name = None
-            cov_method = None
         # Log EWAS
         self.appctx.log_python(f"{new_data_name} = clarite.analyze.ewas("
                                f"phenotype={repr(self.phenotype)}, "
                                f"covariates={repr(self.covariates)}, "
                                f"data={old_data_name}, "
                                f"survey_design_spec={repr(sds_name)}, "
-                               f"cov_method={repr(cov_method)}, "
                                f"min_n={self.min_n})")
 
     def setup_ui(self):
@@ -154,13 +149,6 @@ class EWASDialog(QDialog):
         self.survey_setting_group.setLayout(survey_setting_layout)
         layout.addRow(self.survey_setting_group)
 
-        # Covariance Method Dropdown
-        self.cov_method_combobox = QComboBox(self)
-        for option in self.COV_METHOD_OPTIONS:
-            self.cov_method_combobox.addItem(option)
-        self.cov_method_combobox.currentIndexChanged.connect(lambda idx: self.update_cov_method(idx))
-        survey_setting_layout.addRow("Covariance Method", self.cov_method_combobox)
-
         # Survey df - select a dataset that has been loaded
         self.survey_df_combobox = QComboBox(self)
         for data in [d for d in self.appctx.datasets if d.kind == 'dataset']:
@@ -208,6 +196,12 @@ class EWASDialog(QDialog):
         self.weight_specific_btn.setEnabled(False)  # Disabled b/c weight type is None by default
         survey_setting_layout.addRow("\tSpecific Weight", self.weight_specific_btn)
 
+        # Drop Unweighted
+        self.drop_unweighted_checkbox = QCheckBox(self)
+        self.drop_unweighted_checkbox.setChecked(False)
+        self.drop_unweighted_checkbox.stateChanged.connect(self.update_drop_unweighted)
+        survey_setting_layout.addRow("Drop unweighted observations", self.drop_unweighted_checkbox)
+
         # Single Cluster Dropdown
         self.single_cluster_combobox = QComboBox(self)
         for option in self.SINGLE_CLUSTER_OPTIONS:
@@ -215,7 +209,7 @@ class EWASDialog(QDialog):
         self.single_cluster_combobox.currentIndexChanged.connect(lambda idx: self.update_single_cluster(idx))
         survey_setting_layout.addRow("Single Cluster Handling", self.single_cluster_combobox)
 
-        # Ok/Cancel       
+        # Ok/Cancel
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
 
         self.buttonBox = QDialogButtonBox(QBtn)
@@ -286,10 +280,6 @@ class EWASDialog(QDialog):
         self.use_survey = self.use_survey_checkbox.isChecked()
         self.survey_setting_group.setHidden(not self.use_survey)
         self.adjustSize()
-
-    @pyqtSlot(int)
-    def update_cov_method(self, idx):
-        self.cov_method = self.COV_METHOD_OPTIONS[idx]
 
     @pyqtSlot(int)
     def update_survey_df(self, idx):
@@ -431,6 +421,10 @@ class EWASDialog(QDialog):
             self.weights = weights
             self.weight_specific_btn.setText(f"{unique_weights:,} different weights "
                                              f"assigned to {unique_vars:,} variables")
+            
+    def update_drop_unweighted(self):
+        """Update the nest parameter to match the checkbox"""
+        self.drop_unweighted = self.drop_unweighted_checkbox.isChecked()
 
     @pyqtSlot(int)
     def update_single_cluster(self, idx):
