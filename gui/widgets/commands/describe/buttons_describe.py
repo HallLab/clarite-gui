@@ -6,6 +6,7 @@ from .dialog_correlations import CorrelationDialog
 from .dialog_datatypes import DataTypesDialog
 from .dialog_freqtable import FreqTableDialog
 from .dialog_percentna import PercentNADialog
+from .dialog_skewness import SkewnessDialog
 
 
 class DescribeButtons(QWidget):
@@ -36,6 +37,7 @@ class DescribeButtons(QWidget):
         self.add_button("Frequency Table", FreqTableDialog, layout)
         self.add_button("Data Types", DataTypesDialog, layout)
         self.add_button("Percent NA", PercentNADialog, layout)
+        self.add_button("Skewness", SkewnessDialog, layout)
 
         layout.addWidget(QHLine())
 
