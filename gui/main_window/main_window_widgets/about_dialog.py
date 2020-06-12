@@ -3,9 +3,11 @@ import webbrowser
 import clarite
 from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QLabel, QFormLayout, QPushButton, QHBoxLayout
+from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QLabel, QFormLayout, QPushButton, QHBoxLayout, \
+    QTextEdit
 
 from gui.resources import app_resources
+from gui.widgets.utilities import QHLine
 
 
 class AboutDialog(QDialog):
@@ -56,6 +58,15 @@ class AboutDialog(QDialog):
         self.button.setFixedSize(64, 64)
         bottom_layout.addWidget(self.button)
 
+        layout.addWidget(QHLine())
+
+        # Citations
+        layout.addWidget(QLabel("Citing CLARITE:"))
+        citations_text = QTextEdit()
+        citations_text.setText(CITATION_TEXT)
+        citations_text.setReadOnly(True)
+        layout.addWidget(citations_text)
+
         # Ok/Cancel
         QBtn = QDialogButtonBox.Ok
 
@@ -68,3 +79,8 @@ class AboutDialog(QDialog):
 
     def open_site(self, site):
         webbrowser.open(site)
+
+
+CITATION_TEXT = """
+    <b>CITATIONS GO HERE</b>
+"""
