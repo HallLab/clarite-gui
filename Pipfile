@@ -12,4 +12,4 @@ pyqt5 = "==5.15.0"
 pypiwin32 = {version = "*", sys_platform = "== 'win32'"}
 
 [requires]
-python_version = ">=3.6"
+python_version = "==3.7"

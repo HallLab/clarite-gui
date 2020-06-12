@@ -5,6 +5,7 @@ from gui.widgets.utilities import QHLine
 from .dialog_distributions import DistributionsDialog
 from .dialog_histogram import HistogramDialog
 from .dialog_manhattan import ManhattanPlotDialog
+from .dialog_top_results import TopResultsPlotDialog
 
 
 class PlotButtons(QWidget):
@@ -34,6 +35,7 @@ class PlotButtons(QWidget):
         self.add_button("Histogram", HistogramDialog, layout)
         self.add_button("Distributions", DistributionsDialog, layout)
         self.add_button("Manhattan", ManhattanPlotDialog, layout)
+        self.add_button("Top Results", TopResultsPlotDialog, layout)
 
         layout.addWidget(QHLine())
 
@@ -57,11 +59,14 @@ class PlotButtons(QWidget):
             else:
                 btn.setEnabled(True)
 
-        # Must have ewas results for the manhattan plot
+        # Must have ewas results for some plots
         # TODO: Update to make more flexible (don't need to match kind, just certain columns)
         manhattan_btn = self.btn_dict["Manhattan"]
+        top_result_btn = self.btn_dict["Top Results"]
         num_results = len([d for d in self.appctx.datasets if d.kind == 'ewas_result'])
         if num_results > 0:
             manhattan_btn.setEnabled(True)
+            top_result_btn.setEnabled(True)
         else:
             manhattan_btn.setEnabled(False)
+            top_result_btn.setEnabled(False)
