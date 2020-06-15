@@ -1,4 +1,5 @@
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow, QSplitter, QAction, QTabWidget
 
 from .main_window_widgets import CommandDockWidget, DatasetWidget, LogWidget, \
@@ -21,7 +22,8 @@ class MainWindow(QMainWindow):
             DatasetWidget
             LogWidget
         """
-        self.setWindowTitle(f"CLARITE GUI")
+        self.setWindowTitle(f"CLARITE v{self.appctx.VERSION}")
+        self.setWindowIcon(QIcon(':/images/clarite_logo.png'))
 
         self.setContentsMargins(10, 10, 10, 10)
 

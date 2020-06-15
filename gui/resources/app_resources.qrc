@@ -1,6 +1,7 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource prefix="/">
+        <file>icons/Icon.ico</file>
         <file>images/clarite_logo.png</file>
         <file>images/hall_lab_logo.png</file>
     </qresource>
