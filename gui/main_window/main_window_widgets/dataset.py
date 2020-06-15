@@ -30,13 +30,13 @@ class DatasetWidget(QGroupBox):
         settings.beginGroup("display/data")
         data_colors = dict()
         data_colors["Unknown"] = QColor(settings.value("bgcolor_unknown",
-                                                            defaultValue=QColor.fromRgb(255, 255, 255)))
+                                                       defaultValue=QColor.fromRgb(255, 255, 255)))
         data_colors["Binary"] = QColor(settings.value("bgcolor_binary",
-                                                           defaultValue=QColor.fromRgb(255, 204, 153)))
+                                                      defaultValue=QColor.fromRgb(255, 204, 153)))
         data_colors["Categorical"] = QColor(settings.value("bgcolor_categorical",
-                                                                defaultValue=QColor.fromRgb(153, 204, 255)))
+                                                           defaultValue=QColor.fromRgb(153, 204, 255)))
         data_colors["Continuous"] = QColor(settings.value("bgcolor_continuous",
-                                                               defaultValue=QColor.fromRgb(204, 153, 255)))
+                                                          defaultValue=QColor.fromRgb(204, 153, 255)))
         settings.endGroup()
 
         return data_colors
@@ -204,7 +204,11 @@ class DatasetWidget(QGroupBox):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         filename, _ = QFileDialog.getSaveFileName(self, "QFileDialog.getSaveFileName()", "",
-                                                  "All Files (*);;Text Files (*.txt)", options=options)
+                                                   "All Files (*);;Text Files (*.txt)", options=options)
+
+        # Return without doing anything if a valid file wasn't selected
+        if not filename:
+            return
 
         # Define a no-parameter function to save the data using a thread
         dataset = self.appctx.datasets[self.appctx.current_dataset_idx]
@@ -231,13 +235,11 @@ class DatasetWidget(QGroupBox):
         # Log Info
         save_str = f"\nSaved {len(dataset.df):,} observations of {len(list(dataset.df)):,} variables" \
                    f" in '{dataset.get_selector_name()}' to '{filename}'\n"
-        self.appctx.log_info("\n" + "="*80 + save_str + "="*80)
+        self.appctx.log_info("\n" + "=" * 80 + save_str + "=" * 80)
 
         # Log Python
         self.appctx.log_python(f"# Save data and it's associated datatypes\n"
-                        f"{dataset.get_python_name()}.to_csv({filename}, sep='\t')\n")
-        # TODO: Save datatypes file similar to the commandline?
-
+                               f"{dataset.get_python_name()}.to_csv({filename}, sep='\t')\n")
 
     @pyqtSlot()
     def delete_dataset(self):

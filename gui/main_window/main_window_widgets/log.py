@@ -74,11 +74,11 @@ class LogWidget(QWidget):
         """Save the log"""
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        filename, ok = QFileDialog.getSaveFileName(self, "QFileDialog.getSaveFileName()", "",
+        filename, _ = QFileDialog.getSaveFileName(self, "QFileDialog.getSaveFileName()", "",
                                                    self.filetype, options=options)
 
         # Return without doing anything if a valid file wasn't selected
-        if not ok:
+        if not filename:
             return
 
         # Define a no-parameter function to save the data using a thread
