@@ -36,6 +36,7 @@ class ModifyButtons(QWidget):
     def add_button(self, text, dialog, layout, **kwargs):
         btn = QPushButton(text=text, parent=self)
         btn.clicked.connect(lambda: dialog(parent=self.appctx.main_window, **kwargs).show())
+        btn.setEnabled(False)  # Start disabled until a dataset is loaded, triggering 'datasets changed'
         layout.addWidget(btn)
         self.btn_dict[text] = btn
 
