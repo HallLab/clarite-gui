@@ -5,11 +5,13 @@ verify_ssl = true
 
 [dev-packages]
 flake8 = "*"
+pyinstaller = "*"
 
 [packages]
 clarite = "==1.0.1"
 pyqt5 = "==5.15.0"
 pypiwin32 = {version = "*", sys_platform = "== 'win32'"}
+setuptools = ">47"
 
 [requires]
 python_version = "3.7"
