@@ -109,3 +109,6 @@ Pipfile.lock
 
 # VS Code
 .vscode
+
+# Build
+/build
