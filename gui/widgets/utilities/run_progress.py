@@ -18,8 +18,11 @@ class RunProgress(QProgressDialog):
     progress_str: The string displayed in the progress dialog
 
     """
+
     def __init__(self, progress_str, parent, *args, **kwargs):
-        super(RunProgress, self).__init__(progress_str, "Cancel", 0, 0, parent=parent, *args, **kwargs)
+        super(RunProgress, self).__init__(
+            progress_str, "Cancel", 0, 0, parent=parent, *args, **kwargs
+        )
         # Create thread running the command
         self.thread = RunThread(self)
         self.func = None
@@ -42,7 +45,9 @@ class RunProgress(QProgressDialog):
         self.thread.message.connect(self.appctx.log_info)
         self.thread.error.connect(lambda s: show_critical("Error", s))
         self.thread.finished.connect(self.close)
-        self.canceled.connect(self.thread.cancel)  # Exit thread if the operation is cancelled
+        self.canceled.connect(
+            self.thread.cancel
+        )  # Exit thread if the operation is cancelled
         # Start the thread
         self.thread.start()
         # Show self
@@ -59,8 +64,9 @@ class RunProgress(QProgressDialog):
 
 class RunThread(QThread):
     """
-    Runs a function in a QThread.  Signaling the 'cancel' slot will attempt to quit the thread, but will prevent any result from being used regardless. 
+    Runs a function in a QThread.  Signaling the 'cancel' slot will attempt to quit the thread, but will prevent any result from being used regardless.
     """
+
     finished = pyqtSignal()
     error = pyqtSignal(str)
     result = pyqtSignal(object)

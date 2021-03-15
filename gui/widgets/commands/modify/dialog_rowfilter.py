@@ -1,8 +1,18 @@
 import numpy as np
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtGui import QIntValidator, QDoubleValidator
-from PyQt5.QtWidgets import QDialog, QLabel, QFormLayout, QDialogButtonBox, QLineEdit, QGroupBox, \
-    QHBoxLayout, QRadioButton, QComboBox, QWidget
+from PyQt5.QtWidgets import (
+    QDialog,
+    QLabel,
+    QFormLayout,
+    QDialogButtonBox,
+    QLineEdit,
+    QGroupBox,
+    QHBoxLayout,
+    QRadioButton,
+    QComboBox,
+    QWidget,
+)
 
 from gui.models import Dataset
 from gui.widgets.utilities import warnings, RunProgress
@@ -12,6 +22,7 @@ class RowfilterDialog(QDialog):
     """
     This dialog sets settings for recoding values
     """
+
     def __init__(self, *args, **kwargs):
         super(RowfilterDialog, self).__init__(*args, **kwargs)
         self.appctx = self.parent().appctx
@@ -19,9 +30,14 @@ class RowfilterDialog(QDialog):
         self.dataset = self.appctx.datasets[self.appctx.current_dataset_idx]
         # Stored data to choose from
         self.columns = list(self.dataset.df)
-        self.comparison_method_options = ["less than", "less than or equal to",
-                                          "equal to", "not equal to",
-                                          "greater than or equal to", "greater than"]
+        self.comparison_method_options = [
+            "less than",
+            "less than or equal to",
+            "equal to",
+            "not equal to",
+            "greater than or equal to",
+            "greater than",
+        ]
         # Actual selected values
         self.comparison_column = self.columns[0]
         self.comparison_method = self.comparison_method_options[0]
@@ -40,53 +56,73 @@ class RowfilterDialog(QDialog):
 
         # Build the function
         def f():
-            if method == 'less than':
-                result = data.loc[data[column] < value, ]
-            elif method == 'less than or equal to':
-                result = data.loc[data[column] <= value, ]
-            elif method == 'equal to':
-                result = data.loc[data[column] == value, ]
-            elif method == 'not equal to':
-                result = data.loc[data[column] != value, ]
-            elif method == 'greater than or equal to':
-                result = data.loc[data[column] >= value, ]
-            elif method == 'greater than':
-                result = data.loc[data[column] > value, ]
+            if method == "less than":
+                result = data.loc[
+                    data[column] < value,
+                ]
+            elif method == "less than or equal to":
+                result = data.loc[
+                    data[column] <= value,
+                ]
+            elif method == "equal to":
+                result = data.loc[
+                    data[column] == value,
+                ]
+            elif method == "not equal to":
+                result = data.loc[
+                    data[column] != value,
+                ]
+            elif method == "greater than or equal to":
+                result = data.loc[
+                    data[column] >= value,
+                ]
+            elif method == "greater than":
+                result = data.loc[
+                    data[column] > value,
+                ]
 
             print("=" * 80)
-            print(f"Running Rowfilter: Keep rows where {repr(column)} is {method} {repr(value)}")
+            print(
+                f"Running Rowfilter: Keep rows where {repr(column)} is {method} {repr(value)}"
+            )
             print("-" * 80)
-            print(f"Kept {len(result):,} of {len(data):,} rows ({len(result)/len(data):.2%})")
+            print(
+                f"Kept {len(result):,} of {len(data):,} rows ({len(result)/len(data):.2%})"
+            )
             print("=" * 80)
 
             if data_name is None:
                 return result
             else:
-                return Dataset(data_name, 'dataset', result)
+                return Dataset(data_name, "dataset", result)
 
         return f
 
     def log_command(self):
         old_data_name = self.dataset.get_python_name()  # Original selected data
-        new_data_name = self.appctx.datasets[self.appctx.current_dataset_idx].get_python_name()  # New selected data
+        new_data_name = self.appctx.datasets[
+            self.appctx.current_dataset_idx
+        ].get_python_name()  # New selected data
 
         # Get symbol
-        if self.comparison_method == 'less than':
+        if self.comparison_method == "less than":
             symbol = "<"
-        elif self.comparison_method == 'less than or equal to':
+        elif self.comparison_method == "less than or equal to":
             symbol = "<="
-        elif self.comparison_method == 'equal to':
+        elif self.comparison_method == "equal to":
             symbol = "=="
-        elif self.comparison_method == 'not equal to':
+        elif self.comparison_method == "not equal to":
             symbol = "!="
-        elif self.comparison_method == 'greater than or equal to':
+        elif self.comparison_method == "greater than or equal to":
             symbol = ">="
-        elif self.comparison_method == 'greater than':
+        elif self.comparison_method == "greater than":
             symbol = ">"
 
-        self.appctx.log_python(f"{new_data_name} = {old_data_name}"
-                               f".loc[{old_data_name}[{repr(self.comparison_column)}] {symbol} "
-                               f"{repr(self.comparison_value)}, ]")
+        self.appctx.log_python(
+            f"{new_data_name} = {old_data_name}"
+            f".loc[{old_data_name}[{repr(self.comparison_column)}] {symbol} "
+            f"{repr(self.comparison_value)}, ]"
+        )
 
     def setup_ui(self):
         self.setWindowTitle(f"Rowfilter")
@@ -94,10 +130,12 @@ class RowfilterDialog(QDialog):
         self.setModal(True)
 
         layout = QFormLayout(self)
-        
+
         # Data Name
         self.le_data_name = QLineEdit(self.data_name)
-        self.le_data_name.setPlaceholderText(self.appctx.datasets[self.appctx.current_dataset_idx].name)
+        self.le_data_name.setPlaceholderText(
+            self.appctx.datasets[self.appctx.current_dataset_idx].name
+        )
         self.le_data_name.textChanged.connect(self.update_data_name)
         layout.addRow("Save Dataset Name: ", self.le_data_name)
 
@@ -134,28 +172,36 @@ class RowfilterDialog(QDialog):
         self.comparison_type_layout = QHBoxLayout()
 
         self.comparison_type_int = QRadioButton("Integer", parent=self)
-        self.comparison_type_int.clicked.connect(lambda: self.update_input_type(self.comparison_le, 'int'))
+        self.comparison_type_int.clicked.connect(
+            lambda: self.update_input_type(self.comparison_le, "int")
+        )
         self.comparison_type_layout.addWidget(self.comparison_type_int)
         self.comparison_type_int.setChecked(True)
 
         self.comparison_type_float = QRadioButton("Float", parent=self)
-        self.comparison_type_float.clicked.connect(lambda: self.update_input_type(self.comparison_le, 'float'))
+        self.comparison_type_float.clicked.connect(
+            lambda: self.update_input_type(self.comparison_le, "float")
+        )
         self.comparison_type_layout.addWidget(self.comparison_type_float)
 
         self.comparison_type_string = QRadioButton("String", parent=self)
-        self.comparison_type_string.clicked.connect(lambda: self.update_input_type(self.comparison_le, 'str'))
+        self.comparison_type_string.clicked.connect(
+            lambda: self.update_input_type(self.comparison_le, "str")
+        )
         self.comparison_type_layout.addWidget(self.comparison_type_string)
 
         self.comparison_type_none = QRadioButton("None", parent=self)
-        self.comparison_type_none.clicked.connect(lambda: self.update_input_type(self.comparison_le, 'none'))
+        self.comparison_type_none.clicked.connect(
+            lambda: self.update_input_type(self.comparison_le, "none")
+        )
         self.comparison_type_layout.addWidget(self.comparison_type_none)
 
         self.comparison_type_gb.setLayout(self.comparison_type_layout)
         layout.addRow("Compare value as: ", self.comparison_type_gb)
 
-        # Ok/Cancel       
+        # Ok/Cancel
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        
+
         self.buttonBox = QDialogButtonBox(QBtn)
         layout.addRow(self.buttonBox)
         self.buttonBox.accepted.connect(self.submit)
@@ -169,7 +215,7 @@ class RowfilterDialog(QDialog):
     def update_input_type(input, type):
         """Update the value input depending on the selected type"""
         # Enable/Disable based on "None" being selected
-        if type in ('int', 'float', 'str'):
+        if type in ("int", "float", "str"):
             input.setEnabled(True)
         else:
             input.setEnabled(False)
@@ -178,9 +224,9 @@ class RowfilterDialog(QDialog):
         input.clear()
 
         # Validators
-        if type == 'int':
+        if type == "int":
             input.setValidator(QIntValidator())
-        elif type == 'float':
+        elif type == "float":
             input.setValidator(QDoubleValidator())
         else:
             input.setValidator(None)  # No validation
@@ -224,11 +270,17 @@ class RowfilterDialog(QDialog):
         return None
 
     def submit(self):
-        type_errors = self.update_types()  # Convert the types of 'from' and 'to', returning None if successful
-        if self.data_name is not None and self.data_name in [d.name for d in self.appctx.datasets]:
-            warnings.show_warning("Dataset already exists",
-                                  f"A dataset named '{self.data_name}' already exists.\n"
-                                  f"Use a different name or clear the dataset name field.")
+        type_errors = (
+            self.update_types()
+        )  # Convert the types of 'from' and 'to', returning None if successful
+        if self.data_name is not None and self.data_name in [
+            d.name for d in self.appctx.datasets
+        ]:
+            warnings.show_warning(
+                "Dataset already exists",
+                f"A dataset named '{self.data_name}' already exists.\n"
+                f"Use a different name or clear the dataset name field.",
+            )
         elif type_errors is not None:
             warnings.show_critical("Error", type_errors)
         else:
@@ -237,9 +289,11 @@ class RowfilterDialog(QDialog):
                 slot = self.appctx.update_data
             else:
                 slot = self.appctx.add_dataset
-            RunProgress.run_with_progress(progress_str="Filtering Rows...",
-                                          function=self.get_func(),
-                                          slot=slot,
-                                          parent=self)
+            RunProgress.run_with_progress(
+                progress_str="Filtering Rows...",
+                function=self.get_func(),
+                slot=slot,
+                parent=self,
+            )
             self.log_command()
             self.accept()

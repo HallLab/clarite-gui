@@ -2,21 +2,25 @@ from typing import Callable, Dict
 
 from PyQt5.QtWidgets import QMessageBox, QWidget
 
-btn_map = {'Ok': QMessageBox.Ok,
-           'Open': QMessageBox.Open,
-           'Save': QMessageBox.Save,
-           'Cancel': QMessageBox.Cancel,
-           'Close': QMessageBox.Close,
-           'Discard': QMessageBox.Discard,
-           'Apply': QMessageBox.Apply,
-           'Yes': QMessageBox.Yes,
-           'No': QMessageBox.No,
-           'Abort': QMessageBox.Abort,
-           'Retry': QMessageBox.Retry,
-           'Ignore': QMessageBox.Ignore}
+btn_map = {
+    "Ok": QMessageBox.Ok,
+    "Open": QMessageBox.Open,
+    "Save": QMessageBox.Save,
+    "Cancel": QMessageBox.Cancel,
+    "Close": QMessageBox.Close,
+    "Discard": QMessageBox.Discard,
+    "Apply": QMessageBox.Apply,
+    "Yes": QMessageBox.Yes,
+    "No": QMessageBox.No,
+    "Abort": QMessageBox.Abort,
+    "Retry": QMessageBox.Retry,
+    "Ignore": QMessageBox.Ignore,
+}
 
 
-def confirm_click(parent: QWidget, txt: str, inform_txt: str, button_slots: Dict[str, Callable]) -> None:
+def confirm_click(
+    parent: QWidget, txt: str, inform_txt: str, button_slots: Dict[str, Callable]
+) -> None:
     """
     Confirm an operation, hooking up button to slots (or None) depending on what is clicked.
     Valid buttons:

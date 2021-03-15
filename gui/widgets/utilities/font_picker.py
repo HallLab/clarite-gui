@@ -2,13 +2,21 @@ from typing import Optional
 
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QColor, QFont, QFontInfo
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton, QColorDialog, QFontDialog
+from PyQt5.QtWidgets import (
+    QWidget,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QColorDialog,
+    QFontDialog,
+)
 
 
 class FontPickerWidget(QWidget):
     """
     A font picker widget consisting of a name label and a button that updates when the font is changed
     """
+
     font_changed = pyqtSignal(QFont)
 
     def __init__(self, label_text, initial_font: QFont = QFont(), *args, **kwargs):

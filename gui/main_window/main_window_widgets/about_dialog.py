@@ -3,8 +3,16 @@ import webbrowser
 import clarite
 from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QLabel, QFormLayout, QPushButton, QHBoxLayout, \
-    QTextBrowser
+from PyQt5.QtWidgets import (
+    QDialog,
+    QDialogButtonBox,
+    QVBoxLayout,
+    QLabel,
+    QFormLayout,
+    QPushButton,
+    QHBoxLayout,
+    QTextBrowser,
+)
 
 from gui.widgets.utilities import QHLine
 
@@ -37,22 +45,26 @@ class AboutDialog(QDialog):
         top_layout.addRow("Using CLARITE version:", QLabel(clarite.__version__))
 
         # Github
-        github_link = QLabel('<a href="https://github.com/HallLab/clarite-gui">CLARITE GUI Repo</a>')
+        github_link = QLabel(
+            '<a href="https://github.com/HallLab/clarite-gui">CLARITE GUI Repo</a>'
+        )
         github_link.setOpenExternalLinks(True)
         top_layout.addRow("Github:", github_link)
 
         # Hall Lab Logo Button
-        self.button = QPushButton('', self)
+        self.button = QPushButton("", self)
         self.button.clicked.connect(lambda: self.open_site("https://www.hall-lab.org"))
-        self.button.setIcon(QIcon(':/images/hall_lab_logo.png'))
+        self.button.setIcon(QIcon(":/images/hall_lab_logo.png"))
         self.button.setIconSize(QSize(60, 60))
         self.button.setFixedSize(64, 64)
         bottom_layout.addWidget(self.button)
 
         # Clarite Logo Button
-        self.button = QPushButton('', self)
-        self.button.clicked.connect(lambda: self.open_site("https://www.hall-lab.org/clarite-python/"))
-        self.button.setIcon(QIcon(':/images/clarite_logo.png'))
+        self.button = QPushButton("", self)
+        self.button.clicked.connect(
+            lambda: self.open_site("https://www.hall-lab.org/clarite-python/")
+        )
+        self.button.setIcon(QIcon(":/images/clarite_logo.png"))
         self.button.setIconSize(QSize(60, 60))
         self.button.setFixedSize(64, 64)
         bottom_layout.addWidget(self.button)
@@ -84,18 +96,18 @@ CITATIONS = []
 
 # 1
 CITATIONS.append(
-    'Lucas AM, et al (2019)'
+    "Lucas AM, et al (2019)"
     '<a href="https://www.frontiersin.org/article/10.3389/fgene.2019.01240" style="text-decoration: none;">'
     '"CLARITE facilitates the quality control and analysis process for EWAS of metabolic-related traits."</a> '
-    '<i>Frontiers in Genetics</i>: 10, 1240'
+    "<i>Frontiers in Genetics</i>: 10, 1240"
 )
 # 2
 CITATIONS.append(
-    'Passero K, et al (2020)'
+    "Passero K, et al (2020)"
     '<a href="https://www.worldscientific.com/doi/abs/10.1142/9789811215636_0058" style="text-decoration: none;">'
     '"Phenome-wide association studies on cardiovascular health and fatty acids considering phenotype quality control'
     ' practices for epidemiological data."</a>'
-    '<i>Pacific Symposium on Biocomputing</i>: 25, 659'
+    "<i>Pacific Symposium on Biocomputing</i>: 25, 659"
 )
 
 CITATION_TEXT = f"<ol>{''.join([f'<li>{c}</li>' for c in CITATIONS])}</ol>"

@@ -1,8 +1,15 @@
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QSortFilterProxyModel
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
-from PyQt5.QtWidgets import (QDialog, QListView, QAbstractItemView, QVBoxLayout, QGroupBox,
-                             QDialogButtonBox, QLineEdit)
+from PyQt5.QtWidgets import (
+    QDialog,
+    QListView,
+    QAbstractItemView,
+    QVBoxLayout,
+    QGroupBox,
+    QDialogButtonBox,
+    QLineEdit,
+)
 
 
 class SelectColumnDialog(QDialog):
@@ -23,7 +30,9 @@ class SelectColumnDialog(QDialog):
         self.proxy = QSortFilterProxyModel(self)
         self.proxy.setSourceModel(self.varlist_model)
         self.proxy.setFilterKeyColumn(0)  # Filters based on the only column
-        self.proxy.setFilterCaseSensitivity(Qt.CaseInsensitive)  # Case insensitive search
+        self.proxy.setFilterCaseSensitivity(
+            Qt.CaseInsensitive
+        )  # Case insensitive search
 
         # Setup Layout
         layout = QVBoxLayout(self)
@@ -41,7 +50,7 @@ class SelectColumnDialog(QDialog):
 
         # Add a search box
         self.varlist_search = QLineEdit(parent=self)
-        self.varlist_search.setPlaceholderText('Search...')
+        self.varlist_search.setPlaceholderText("Search...")
         self.varlist_search.textChanged.connect(self.proxy.setFilterFixedString)
         varlist_box_layout.addWidget(self.varlist_search)
 
@@ -80,7 +89,9 @@ class SelectColumnDialog(QDialog):
             self.varlist_model.appendRow(QStandardItem(v))
             if v == self.selected:
                 selection_index = self.varlist_model.index(idx, 0)
-                mode = QtCore.QItemSelectionModel.Select | QtCore.QItemSelectionModel.Rows
+                mode = (
+                    QtCore.QItemSelectionModel.Select | QtCore.QItemSelectionModel.Rows
+                )
                 self.varlist.selectionModel().select(selection_index, mode)
 
     def submit(self):

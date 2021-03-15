@@ -13,6 +13,7 @@ class DescribeButtons(QWidget):
     """
     Widget that holds the buttons for Describe commands
     """
+
     def __init__(self, *args, **kwargs):
         super(DescribeButtons, self).__init__(*args, **kwargs)
         self.appctx = self.parent().appctx
@@ -26,8 +27,12 @@ class DescribeButtons(QWidget):
 
     def add_button(self, text, dialog, layout, **kwargs):
         btn = QPushButton(text=text, parent=self)
-        btn.clicked.connect(lambda: dialog(parent=self.appctx.main_window, **kwargs).show())
-        btn.setEnabled(False)  # Start disabled until a dataset is loaded, triggering 'datasets changed'
+        btn.clicked.connect(
+            lambda: dialog(parent=self.appctx.main_window, **kwargs).show()
+        )
+        btn.setEnabled(
+            False
+        )  # Start disabled until a dataset is loaded, triggering 'datasets changed'
         layout.addWidget(btn)
         self.btn_dict[text] = btn
 
@@ -51,14 +56,16 @@ class DescribeButtons(QWidget):
         df_count = len(self.appctx.datasets)
         if df_count > 0:
             current_kind = self.appctx.datasets[self.appctx.current_dataset_idx].kind
-            dataset_count = len([d for d in self.appctx.datasets if d.kind == 'dataset'])
+            dataset_count = len(
+                [d for d in self.appctx.datasets if d.kind == "dataset"]
+            )
         else:
             current_kind = None
             dataset_count = 0
 
         # Current df must be a dataset
         for btn in self.btn_dict.values():
-            if current_kind != 'dataset' or dataset_count == 0:
+            if current_kind != "dataset" or dataset_count == 0:
                 btn.setEnabled(False)
             else:
                 btn.setEnabled(True)

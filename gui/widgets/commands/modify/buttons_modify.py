@@ -22,6 +22,7 @@ class ModifyButtons(QWidget):
     """
     Widget that holds the buttons for Modify commands
     """
+
     def __init__(self, *args, **kwargs):
         super(ModifyButtons, self).__init__(*args, **kwargs)
         self.appctx = self.parent().appctx
@@ -35,8 +36,12 @@ class ModifyButtons(QWidget):
 
     def add_button(self, text, dialog, layout, **kwargs):
         btn = QPushButton(text=text, parent=self)
-        btn.clicked.connect(lambda: dialog(parent=self.appctx.main_window, **kwargs).show())
-        btn.setEnabled(False)  # Start disabled until a dataset is loaded, triggering 'datasets changed'
+        btn.clicked.connect(
+            lambda: dialog(parent=self.appctx.main_window, **kwargs).show()
+        )
+        btn.setEnabled(
+            False
+        )  # Start disabled until a dataset is loaded, triggering 'datasets changed'
         layout.addWidget(btn)
         self.btn_dict[text] = btn
 
@@ -50,9 +55,13 @@ class ModifyButtons(QWidget):
         self.add_button("Colfilter Min N", ColfilterMinN, layout)
         self.add_button("Colfilter Min Cat N", ColfilterMinCatN, layout)
         layout.addWidget(QHLine())
-        self.add_button("Make Binary", MakeTypeDialog, layout, var_type='binary')
-        self.add_button("Make Categorical", MakeTypeDialog, layout, var_type='categorical')
-        self.add_button("Make Continuous", MakeTypeDialog, layout, var_type='continuous')
+        self.add_button("Make Binary", MakeTypeDialog, layout, var_type="binary")
+        self.add_button(
+            "Make Categorical", MakeTypeDialog, layout, var_type="categorical"
+        )
+        self.add_button(
+            "Make Continuous", MakeTypeDialog, layout, var_type="continuous"
+        )
         layout.addWidget(QHLine())
         self.add_button("Merge Observations", MergeObsDialog, layout)
         self.add_button("Merge Variables", MergeVarsDialog, layout)
@@ -75,7 +84,9 @@ class ModifyButtons(QWidget):
         df_count = len(self.appctx.datasets)
         if df_count > 0:
             current_kind = self.appctx.datasets[self.appctx.current_dataset_idx].kind
-            dataset_count = len([d for d in self.appctx.datasets if d.kind == 'dataset'])
+            dataset_count = len(
+                [d for d in self.appctx.datasets if d.kind == "dataset"]
+            )
         else:
             current_kind = None
             dataset_count = 0
@@ -86,17 +97,17 @@ class ModifyButtons(QWidget):
 
         # Enable rowfilter and colfilter if at least one df is loaded
         if df_count > 0:
-            for b in ['Colfilter', 'Rowfilter']:
+            for b in ["Colfilter", "Rowfilter"]:
                 btn = self.btn_dict[b]
                 btn.setEnabled(True)
 
         # Enable others if a dataset is currently shown
-        if current_kind == 'dataset':
+        if current_kind == "dataset":
             for btn in self.btn_dict.values():
                 btn.setEnabled(True)
 
         # Disable merge buttons if there are not at least two datasets loaded
         if dataset_count < 2:
-            for b in ['Merge Observations', 'Merge Variables']:
+            for b in ["Merge Observations", "Merge Variables"]:
                 btn = self.btn_dict[b]
                 btn.setEnabled(False)

@@ -9,6 +9,7 @@ class CategorizeDialog(QDialog):
     """
     This dialog allows sets settings for categorization
     """
+
     def __init__(self, *args, **kwargs):
         super(CategorizeDialog, self).__init__(*args, **kwargs)
         self.appctx = self.parent().appctx
@@ -29,16 +30,21 @@ class CategorizeDialog(QDialog):
 
         def f():
             return clarite.modify.categorize(dataset.df, cat_min, cat_max, cont_min)
+
         return f
 
     def log_command(self):
         old_data_name = self.dataset.get_python_name()
-        new_data_name = self.appctx.datasets[self.appctx.current_dataset_idx].get_python_name()
-        self.appctx.log_python(f"{new_data_name} = clarite.modify.categorize("
-                               f"data={old_data_name}, "
-                               f"cat_min={self.cat_min}, "
-                               f"cat_max={self.cat_max}, "
-                               f"cont_min={self.cont_min})")
+        new_data_name = self.appctx.datasets[
+            self.appctx.current_dataset_idx
+        ].get_python_name()
+        self.appctx.log_python(
+            f"{new_data_name} = clarite.modify.categorize("
+            f"data={old_data_name}, "
+            f"cat_min={self.cat_min}, "
+            f"cat_max={self.cat_max}, "
+            f"cont_min={self.cont_min})"
+        )
 
     def setup_ui(self):
         self.setWindowTitle(f"Categorize Data")
@@ -47,7 +53,7 @@ class CategorizeDialog(QDialog):
 
         layout = QFormLayout()
         layout.addRow(QLabel("Number of unique values:"))
-        
+
         # Min cat (default = 3)
         self.setting_cat_min = QSpinBox(self)
         self.setting_cat_min.setValue(3)
@@ -69,9 +75,9 @@ class CategorizeDialog(QDialog):
         layout.addRow("Continuous Minimum", self.setting_cont_min)
         self.setting_cont_min.valueChanged.connect(self.change_cont_min)
 
-        # Ok/Cancel       
+        # Ok/Cancel
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        
+
         self.buttonBox = QDialogButtonBox(QBtn)
         layout.addRow(self.buttonBox)
         self.buttonBox.accepted.connect(self.submit)
@@ -95,16 +101,27 @@ class CategorizeDialog(QDialog):
     def submit(self):
         print(f"categorize with {self.cat_min}, {self.cat_max}, {self.cont_min}")
         if self.cat_min > self.cat_max:
-            warnings.show_warning("Parameter Error", f"'Categorical Minimum' must be <= 'Categorical Maximum'")
+            warnings.show_warning(
+                "Parameter Error",
+                f"'Categorical Minimum' must be <= 'Categorical Maximum'",
+            )
         elif self.cat_min > self.cont_min:
-            warnings.show_warning("Parameter Error", f"'Categorical Minimum' must be < 'Continuous Minimum'")
+            warnings.show_warning(
+                "Parameter Error",
+                f"'Categorical Minimum' must be < 'Continuous Minimum'",
+            )
         elif self.cat_max >= self.cont_min:
-            warnings.show_warning("Parameter Error", f"'Categorical Maximum' must be < 'Continuous Minimum'")
+            warnings.show_warning(
+                "Parameter Error",
+                f"'Categorical Maximum' must be < 'Continuous Minimum'",
+            )
         else:
             # Run with a progress dialog
-            RunProgress.run_with_progress(progress_str="Categorizing variables...",
-                                          function=self.get_func(),
-                                          slot=self.appctx.update_data,
-                                          parent=self)
+            RunProgress.run_with_progress(
+                progress_str="Categorizing variables...",
+                function=self.get_func(),
+                slot=self.appctx.update_data,
+                parent=self,
+            )
             self.log_command()
             self.accept()

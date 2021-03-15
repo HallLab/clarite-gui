@@ -9,6 +9,7 @@ class MakeTypeDialog(QDialog):
     """
     This dialog sets settings for the make_<type> functions
     """
+
     def __init__(self, var_type, *args, **kwargs):
         super(MakeTypeDialog, self).__init__(*args, **kwargs)
         self.appctx = self.parent().appctx
@@ -28,11 +29,11 @@ class MakeTypeDialog(QDialog):
         var_type = self.var_type
 
         def f():
-            if var_type == 'binary':
+            if var_type == "binary":
                 result = clarite.modify.make_binary(data, skip, only)
-            elif var_type == 'categorical':
+            elif var_type == "categorical":
                 result = clarite.modify.make_categorical(data, skip, only)
-            elif var_type == 'continuous':
+            elif var_type == "continuous":
                 result = clarite.modify.make_continuous(data, skip, only)
             return result
 
@@ -40,10 +41,12 @@ class MakeTypeDialog(QDialog):
 
     def log_command(self):
         dataset_name = self.dataset.get_python_name()  # Original selected data
-        self.appctx.log_python(f"{dataset_name} = clarite.modify.make_{self.var_type}("
-                               f"data={dataset_name}, "
-                               f"skip={self.skip}, "
-                               f"only={self.only})")
+        self.appctx.log_python(
+            f"{dataset_name} = clarite.modify.make_{self.var_type}("
+            f"data={dataset_name}, "
+            f"skip={self.skip}, "
+            f"only={self.only})"
+        )
 
     def setup_ui(self):
         self.setWindowTitle(f"Make {self.var_type}")
@@ -51,17 +54,19 @@ class MakeTypeDialog(QDialog):
         self.setModal(True)
 
         layout = QFormLayout(self)
-        
+
         # Skip/Only
         self.skiponly_label = QLabel(self)
-        self.skiponly_label.setText(f"Using all {len(list(self.dataset.df)):,} variables")
+        self.skiponly_label.setText(
+            f"Using all {len(list(self.dataset.df)):,} variables"
+        )
         self.btn_skiponly = QPushButton("Edit", parent=self)
         self.btn_skiponly.clicked.connect(self.launch_skiponly)
         layout.addRow(self.skiponly_label, self.btn_skiponly)
 
-        # Ok/Cancel       
+        # Ok/Cancel
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        
+
         self.buttonBox = QDialogButtonBox(QBtn)
         layout.addRow(self.buttonBox)
         self.buttonBox.accepted.connect(self.submit)
@@ -74,16 +79,18 @@ class MakeTypeDialog(QDialog):
     def launch_skiponly(self):
         """Launch a dialog to set skip/only"""
         # Update skip and only
-        text, self.skip, self.only = SkipOnlyDialog.get_skip_only(columns=list(self.dataset.df),
-                                                                  skip=self.skip, only=self.only,
-                                                                  parent=self)
+        text, self.skip, self.only = SkipOnlyDialog.get_skip_only(
+            columns=list(self.dataset.df), skip=self.skip, only=self.only, parent=self
+        )
         self.skiponly_label.setText(text)
 
     def submit(self):
         # Run with a progress dialog
-        RunProgress.run_with_progress(progress_str="Converting variable types...",
-                                      function=self.get_func(),
-                                      slot=self.appctx.update_data,
-                                      parent=self)
+        RunProgress.run_with_progress(
+            progress_str="Converting variable types...",
+            function=self.get_func(),
+            slot=self.appctx.update_data,
+            parent=self,
+        )
         self.log_command()
         self.accept()

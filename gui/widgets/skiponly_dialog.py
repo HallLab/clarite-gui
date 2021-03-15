@@ -1,17 +1,30 @@
 from PyQt5.QtCore import Qt, QSortFilterProxyModel
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
-from PyQt5.QtWidgets import (QDialog, QGridLayout, QListView, QAbstractItemView, QPushButton,
-                               QRadioButton, QVBoxLayout, QHBoxLayout, QWidget, QGroupBox,
-                               QDialogButtonBox, QLabel, QLineEdit)
+from PyQt5.QtWidgets import (
+    QDialog,
+    QGridLayout,
+    QListView,
+    QAbstractItemView,
+    QPushButton,
+    QRadioButton,
+    QVBoxLayout,
+    QHBoxLayout,
+    QWidget,
+    QGroupBox,
+    QDialogButtonBox,
+    QLabel,
+    QLineEdit,
+)
 
 
 class SkipOnlyDialog(QDialog):
-
     def __init__(self, columns=None, skip=None, only=None, parent=None):
         super(SkipOnlyDialog, self).__init__(parent)
         self.setWindowTitle("Select Columns")
         self.columns = columns
-        self.selected_variables = []  # Names of selected variables.  Only updated when accepting the dialog.
+        self.selected_variables = (
+            []
+        )  # Names of selected variables.  Only updated when accepting the dialog.
         # Select 'only' by default (unless a skip list is passed in)
         # starting_only and only are booleans to indicate whether 'only' is selected
         # starting_selected and selected are boolean arrays to indicate whether each variable is selected
@@ -32,13 +45,17 @@ class SkipOnlyDialog(QDialog):
         self.left_proxy = QSortFilterProxyModel(self)
         self.left_proxy.setSourceModel(self.left_model)
         self.left_proxy.setFilterKeyColumn(0)  # Filters based on the only column
-        self.left_proxy.setFilterCaseSensitivity(Qt.CaseInsensitive)  # Case insensitive search
+        self.left_proxy.setFilterCaseSensitivity(
+            Qt.CaseInsensitive
+        )  # Case insensitive search
         # Selected - Right side
         self.right_model = QStandardItemModel()
         self.right_proxy = QSortFilterProxyModel(self)
         self.right_proxy.setSourceModel(self.right_model)
         self.right_proxy.setFilterKeyColumn(0)  # Filters based on the only column
-        self.right_proxy.setFilterCaseSensitivity(Qt.CaseInsensitive)  # Case insensitive search
+        self.right_proxy.setFilterCaseSensitivity(
+            Qt.CaseInsensitive
+        )  # Case insensitive search
 
         # Setup Layout
         layout = QGridLayout(self)
@@ -53,12 +70,14 @@ class SkipOnlyDialog(QDialog):
         self.left_list = QListView(self)
         self.left_list.setModel(self.left_proxy)
         self.left_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.left_list.selectionModel().selectionChanged.connect(self.left_selected_change)
+        self.left_list.selectionModel().selectionChanged.connect(
+            self.left_selected_change
+        )
         self.left_list.setEditTriggers(QAbstractItemView.NoEditTriggers)
         left_list_box_layout.addWidget(self.left_list)
         # Add a search box
         self.left_list_search = QLineEdit(parent=self)
-        self.left_list_search.setPlaceholderText('Search...')
+        self.left_list_search.setPlaceholderText("Search...")
         self.left_list_search.textChanged.connect(self.left_proxy.setFilterFixedString)
         left_list_box_layout.addWidget(self.left_list_search)
         # Set layout and add to the main layout
@@ -99,13 +118,17 @@ class SkipOnlyDialog(QDialog):
         self.right_list = QListView(self)
         self.right_list.setModel(self.right_proxy)
         self.right_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.right_list.selectionModel().selectionChanged.connect(self.right_selected_change)
+        self.right_list.selectionModel().selectionChanged.connect(
+            self.right_selected_change
+        )
         self.right_list.setEditTriggers(QAbstractItemView.NoEditTriggers)
         right_list_box_layout.addWidget(self.right_list)
         # Add a search box
         self.right_list_search = QLineEdit(parent=self)
-        self.right_list_search.setPlaceholderText('Search...')
-        self.right_list_search.textChanged.connect(self.right_proxy.setFilterFixedString)
+        self.right_list_search.setPlaceholderText("Search...")
+        self.right_list_search.textChanged.connect(
+            self.right_proxy.setFilterFixedString
+        )
         right_list_box_layout.addWidget(self.right_list_search)
         # Set layout and add to the main layout
         right_list_box.setLayout(right_list_box_layout)
@@ -129,9 +152,9 @@ class SkipOnlyDialog(QDialog):
         self.result_label.setText("0 Variables to be used")
         layout.addWidget(self.result_label, 2, 0)
 
-        # Ok/Cancel       
+        # Ok/Cancel
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        
+
         self.buttonBox = QDialogButtonBox(QBtn)
         self.buttonBox.accepted.connect(self.submit)
         self.buttonBox.rejected.connect(self.reject)
@@ -148,7 +171,9 @@ class SkipOnlyDialog(QDialog):
         self.left_model.clear()
         self.right_model.clear()
         # Set to the starting state
-        self.selected = self.starting_selected.copy()  # Take a copy, don't refer to the same list
+        self.selected = (
+            self.starting_selected.copy()
+        )  # Take a copy, don't refer to the same list
         self.only = self.starting_only
         for v, is_selected in zip(self.columns, self.selected):
             if not is_selected:
@@ -189,13 +214,13 @@ class SkipOnlyDialog(QDialog):
 
     def reset_list(self, side):
         """Clear the search field and show the full list"""
-        if side == 'available':
+        if side == "available":
             self.left_list_search.setText("")
             self.left_model.clear()
             for v, is_selected in zip(self.columns, self.selected):
                 if not is_selected:
                     self.left_model.appendRow(QStandardItem(v))
-        elif side == 'selected':
+        elif side == "selected":
             self.right_list_search.setText("")
             self.right_model.clear()
             for v, is_selected in zip(self.columns, self.selected):
@@ -207,9 +232,14 @@ class SkipOnlyDialog(QDialog):
         Move currently selected columns on the left to the right side
         """
         # Clear any right-side search
-        self.reset_list('selected')
+        self.reset_list("selected")
         # Get selection rows (indexed directly in the model)
-        left_selected = sorted([self.left_proxy.mapToSource(idx).row() for idx in self.left_list.selectedIndexes()])
+        left_selected = sorted(
+            [
+                self.left_proxy.mapToSource(idx).row()
+                for idx in self.left_list.selectedIndexes()
+            ]
+        )
         # Move items
         for idx in left_selected:
             item = self.left_model.takeItem(idx)
@@ -218,7 +248,9 @@ class SkipOnlyDialog(QDialog):
             col_idx = self.columns.index(item.text())
             self.selected[col_idx] = True
         # Delete rows after moving them (don't do it during because it causes index changes)
-        for idx in reversed(left_selected):  # Remove in reverse order, otherwise index changes
+        for idx in reversed(
+            left_selected
+        ):  # Remove in reverse order, otherwise index changes
             self.left_model.removeRow(idx)
         # Update label
         self.update_result()
@@ -230,9 +262,14 @@ class SkipOnlyDialog(QDialog):
         Move currently selected columns on the right to the left side
         """
         # Clear any left-side search
-        self.reset_list('available')
+        self.reset_list("available")
         # Get selection rows (indexed directly in the model)
-        right_selected = sorted([self.right_proxy.mapToSource(idx).row() for idx in self.right_list.selectedIndexes()])
+        right_selected = sorted(
+            [
+                self.right_proxy.mapToSource(idx).row()
+                for idx in self.right_list.selectedIndexes()
+            ]
+        )
         # Move items
         for idx in right_selected:
             item = self.right_model.takeItem(idx)
@@ -241,7 +278,9 @@ class SkipOnlyDialog(QDialog):
             col_idx = self.columns.index(item.text())
             self.selected[col_idx] = False
         # Delete rows after moving them (don't do it during because it causes index changes)
-        for idx in reversed(right_selected):  # Remove in reverse order, otherwise index changes
+        for idx in reversed(
+            right_selected
+        ):  # Remove in reverse order, otherwise index changes
             self.right_model.removeRow(idx)
         # Update label
         self.update_result()
@@ -257,9 +296,13 @@ class SkipOnlyDialog(QDialog):
         if num_selected == 0:
             self.result_label.setText(f"Using all {len(self.columns):,} variables")
         elif self.only:
-            self.result_label.setText(f"Only using {num_selected:,} of {len(self.columns):,} variables")
+            self.result_label.setText(
+                f"Only using {num_selected:,} of {len(self.columns):,} variables"
+            )
         else:
-            self.result_label.setText(f"Skipping {num_selected:,} of {len(self.columns):,} variables")
+            self.result_label.setText(
+                f"Skipping {num_selected:,} of {len(self.columns):,} variables"
+            )
 
         # Set the undo button status
         if self.selected == self.starting_selected and self.only == self.starting_only:
@@ -277,7 +320,9 @@ class SkipOnlyDialog(QDialog):
 
     def submit(self):
         # TODO: Add any warnings here
-        self.selected_variables = [c for (c, is_selected) in zip(self.columns, self.selected) if is_selected]
+        self.selected_variables = [
+            c for (c, is_selected) in zip(self.columns, self.selected) if is_selected
+        ]
         self.accept()
 
     @staticmethod

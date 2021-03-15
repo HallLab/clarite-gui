@@ -28,20 +28,26 @@ class CorrectedPvalDialog(QDialog):
 
         # Survey Parameters
         def f():
-            result = data.copy(deep=True)  # This function works in-place, so a copy must be created first
+            result = data.copy(
+                deep=True
+            )  # This function works in-place, so a copy must be created first
             clarite.analyze.add_corrected_pvalues(result)
             if data_name is None:
                 return result
             else:
-                return Dataset(data_name, 'ewas_result', result)
+                return Dataset(data_name, "ewas_result", result)
 
         return f
 
     def log_command(self):
         old_data_name = self.dataset.get_python_name()  # Original selected data
-        new_data_name = self.appctx.datasets[self.appctx.current_dataset_idx].get_python_name()  # New selected data
-        self.appctx.log_python(f"{new_data_name} = clarite.describe.correlations(data={old_data_name}, "
-                               f"threshold={repr(self.threshold)})")
+        new_data_name = self.appctx.datasets[
+            self.appctx.current_dataset_idx
+        ].get_python_name()  # New selected data
+        self.appctx.log_python(
+            f"{new_data_name} = clarite.describe.correlations(data={old_data_name}, "
+            f"threshold={repr(self.threshold)})"
+        )
 
     def setup_ui(self):
         self.setWindowTitle(f"Add Corrected P-values")
@@ -58,7 +64,7 @@ class CorrectedPvalDialog(QDialog):
         self.le_data_name.textChanged.connect(self.update_data_name)
         layout.addRow("Save Dataset Name: ", self.le_data_name)
 
-        # Ok/Cancel       
+        # Ok/Cancel
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
 
         self.buttonBox = QDialogButtonBox(QBtn)
@@ -74,16 +80,18 @@ class CorrectedPvalDialog(QDialog):
             self.data_name = text
 
     def submit(self):
-        if self.data_name is not None and self.data_name in [d.name for d in self.appctx.datasets]:
-            show_warning("Dataset already exists",
-                         f"A dataset named '{self.data_name}' already exists.\n"
-                         f"Use a different name or clear the dataset name field.")
-        elif 'converged' not in list(self.dataset.df):
-            show_warning("Incorrect Data Input",
-                         "A 'converged' column must be present")
-        elif 'pvalue' not in list(self.dataset.df):
-            show_warning("Incorrect Data Input",
-                         "A 'pvalue' column must be present")
+        if self.data_name is not None and self.data_name in [
+            d.name for d in self.appctx.datasets
+        ]:
+            show_warning(
+                "Dataset already exists",
+                f"A dataset named '{self.data_name}' already exists.\n"
+                f"Use a different name or clear the dataset name field.",
+            )
+        elif "converged" not in list(self.dataset.df):
+            show_warning("Incorrect Data Input", "A 'converged' column must be present")
+        elif "pvalue" not in list(self.dataset.df):
+            show_warning("Incorrect Data Input", "A 'pvalue' column must be present")
         else:
             print(f"Adding corrected P-values...")
             # Run with a progress dialog
@@ -91,9 +99,11 @@ class CorrectedPvalDialog(QDialog):
                 slot = self.appctx.update_data
             else:
                 slot = self.appctx.add_dataset
-            RunProgress.run_with_progress(progress_str="Adding corrected P-values...",
-                                          function=self.get_func(),
-                                          slot=slot,
-                                          parent=self)
+            RunProgress.run_with_progress(
+                progress_str="Adding corrected P-values...",
+                function=self.get_func(),
+                slot=slot,
+                parent=self,
+            )
             self.log_command()
             self.accept()

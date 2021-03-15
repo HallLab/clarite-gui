@@ -14,6 +14,7 @@ class Dataset:
     data - input data to be used in the analysis, which may have any variables as columns and observations as rows.
     result - output from the ewas function which means there are certain columns defined and each row is a variable.
     """
+
     def __init__(self, name: str, kind: str, df: pd.DataFrame):
         self.name = name
         self.kind = kind

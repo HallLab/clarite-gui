@@ -11,6 +11,7 @@ class MergeVarsDialog(QDialog):
     This dialog sets settings for merging variables.
     Showing the dialog isn't possible unless there are at least two datasets loaded.
     """
+
     def __init__(self, *args, **kwargs):
         super(MergeVarsDialog, self).__init__(*args, **kwargs)
         self.appctx = self.parent().appctx
@@ -19,7 +20,7 @@ class MergeVarsDialog(QDialog):
         self.left_name = None
         self.right_idx = None
         self.right_name = None
-        self.how_options = ['left', 'right', 'inner', 'outer']
+        self.how_options = ["left", "right", "inner", "outer"]
         self.how = "outer"
         self.data_name = None
         # Setup UI
@@ -34,18 +35,22 @@ class MergeVarsDialog(QDialog):
 
         def f():
             result = clarite.modify.merge_variables(left, right, how)
-            return Dataset(data_name, 'dataset', result)
+            return Dataset(data_name, "dataset", result)
 
         return f
 
     def log_command(self):
         left_data_name = self.appctx.datasets[self.left_idx].get_python_name()
         right_data_name = self.appctx.datasets[self.right_idx].get_python_name()
-        new_data_name = self.appctx.datasets[self.appctx.current_dataset_idx].get_python_name()  # New selected data
-        self.appctx.log_python(f"{new_data_name} = clarite.modify.merge_variables("
-                               f"left={left_data_name}, "
-                               f"right={right_data_name}), "
-                               f"how={repr(self.how)})")
+        new_data_name = self.appctx.datasets[
+            self.appctx.current_dataset_idx
+        ].get_python_name()  # New selected data
+        self.appctx.log_python(
+            f"{new_data_name} = clarite.modify.merge_variables("
+            f"left={left_data_name}, "
+            f"right={right_data_name}), "
+            f"how={repr(self.how)})"
+        )
 
     def setup_ui(self):
         self.setWindowTitle(f"Merge Variables")
@@ -53,7 +58,7 @@ class MergeVarsDialog(QDialog):
         self.setModal(True)
 
         layout = QFormLayout(self)
-        
+
         # Left
         self.left_select = QComboBox(self)
         self.left_select.currentIndexChanged.connect(self.update_left)
@@ -72,15 +77,15 @@ class MergeVarsDialog(QDialog):
         self.how_select.setCurrentIndex(3)  # 'outer' by default
         layout.addRow("How: ", self.how_select)
 
-        # Data Name       
+        # Data Name
         self.le_data_name = QLineEdit(self.data_name)
         self.le_data_name.setPlaceholderText(f"{self.left_name}_{self.right_name}")
         self.le_data_name.textChanged.connect(self.update_data_name)
         layout.addRow("Save Dataset Name: ", self.le_data_name)
 
-        # Ok/Cancel       
+        # Ok/Cancel
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        
+
         self.buttonBox = QDialogButtonBox(QBtn)
         layout.addRow(self.buttonBox)
         self.buttonBox.accepted.connect(self.submit)
@@ -127,16 +132,28 @@ class MergeVarsDialog(QDialog):
         if self.data_name is None:
             self.data_name = self.le_data_name.placeholderText()
 
-        if self.data_name is not None and self.data_name in [d.name for d in self.appctx.datasets]:
-            warnings.show_warning("Dataset already exists",
-                                  f"A dataset named '{self.data_name}' already exists.\n"
-                                  f"Use a different name.")
-        elif self.left_idx is None or self.right_idx is None or self.left_idx == self.right_idx:
-            warnings.show_warning("Select Two Datasets", "Two different datasets must be selected.")
+        if self.data_name is not None and self.data_name in [
+            d.name for d in self.appctx.datasets
+        ]:
+            warnings.show_warning(
+                "Dataset already exists",
+                f"A dataset named '{self.data_name}' already exists.\n"
+                f"Use a different name.",
+            )
+        elif (
+            self.left_idx is None
+            or self.right_idx is None
+            or self.left_idx == self.right_idx
+        ):
+            warnings.show_warning(
+                "Select Two Datasets", "Two different datasets must be selected."
+            )
         else:
-            RunProgress.run_with_progress(progress_str="Merging Data...",
-                                          function=self.get_func(),
-                                          slot=self.appctx.add_dataset,
-                                          parent=self)
+            RunProgress.run_with_progress(
+                progress_str="Merging Data...",
+                function=self.get_func(),
+                slot=self.appctx.add_dataset,
+                parent=self,
+            )
             self.log_command()
             self.accept()

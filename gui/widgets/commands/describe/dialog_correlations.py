@@ -1,5 +1,12 @@
 import clarite
-from PyQt5.QtWidgets import QDialog, QLabel, QFormLayout, QDialogButtonBox, QLineEdit, QDoubleSpinBox
+from PyQt5.QtWidgets import (
+    QDialog,
+    QLabel,
+    QFormLayout,
+    QDialogButtonBox,
+    QLineEdit,
+    QDoubleSpinBox,
+)
 
 from gui.models import Dataset
 from gui.widgets.utilities import RunProgress, show_warning
@@ -9,6 +16,7 @@ class CorrelationDialog(QDialog):
     """
     This dialog allows sets settings for calculating correlations
     """
+
     def __init__(self, *args, **kwargs):
         super(CorrelationDialog, self).__init__(*args, **kwargs)
         self.appctx = self.parent().appctx
@@ -29,15 +37,19 @@ class CorrelationDialog(QDialog):
 
         def f():
             result = clarite.describe.correlations(data, threshold)
-            return Dataset(data_name, 'correlations', result)
+            return Dataset(data_name, "correlations", result)
 
         return f
 
     def log_command(self):
         old_data_name = self.dataset.get_python_name()  # Original selected data
-        new_data_name = self.appctx.datasets[self.appctx.current_dataset_idx].get_python_name()  # New selected data
-        self.appctx.log_python(f"{new_data_name} = clarite.describe.correlations(data={old_data_name}, "
-                               f"threshold={repr(self.threshold)})")
+        new_data_name = self.appctx.datasets[
+            self.appctx.current_dataset_idx
+        ].get_python_name()  # New selected data
+        self.appctx.log_python(
+            f"{new_data_name} = clarite.describe.correlations(data={old_data_name}, "
+            f"threshold={repr(self.threshold)})"
+        )
 
     def setup_ui(self):
         self.setWindowTitle(f"Correlations")
@@ -63,9 +75,9 @@ class CorrelationDialog(QDialog):
         self.le_data_name.textChanged.connect(self.update_data_name)
         layout.addRow("Save Dataset Name: ", self.le_data_name)
 
-        # Ok/Cancel       
+        # Ok/Cancel
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        
+
         self.buttonBox = QDialogButtonBox(QBtn)
         layout.addRow(self.buttonBox)
         self.buttonBox.accepted.connect(self.submit)
@@ -85,16 +97,22 @@ class CorrelationDialog(QDialog):
             self.data_name = text
 
     def submit(self):
-        if self.data_name is not None and self.data_name in [d.name for d in self.appctx.datasets]:
-            show_warning("Dataset already exists",
-                         f"A dataset named '{self.data_name}' already exists.\n"
-                         f"Use a different name or clear the dataset name field.")
+        if self.data_name is not None and self.data_name in [
+            d.name for d in self.appctx.datasets
+        ]:
+            show_warning(
+                "Dataset already exists",
+                f"A dataset named '{self.data_name}' already exists.\n"
+                f"Use a different name or clear the dataset name field.",
+            )
         else:
             print(f"Reporting correlations >= {self.threshold:.2f}")
             # Run with a progress dialog
-            RunProgress.run_with_progress(progress_str="Calculating correlations...",
-                                          function=self.get_func(),
-                                          slot=self.appctx.add_dataset,
-                                          parent=self)
+            RunProgress.run_with_progress(
+                progress_str="Calculating correlations...",
+                function=self.get_func(),
+                slot=self.appctx.add_dataset,
+                parent=self,
+            )
             self.log_command()
             self.accept()

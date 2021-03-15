@@ -1,7 +1,15 @@
 import clarite
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QDialog, QLabel, QFormLayout, QDialogButtonBox, QPushButton, QSpinBox, QFileDialog, \
-    QComboBox
+from PyQt5.QtWidgets import (
+    QDialog,
+    QLabel,
+    QFormLayout,
+    QDialogButtonBox,
+    QPushButton,
+    QSpinBox,
+    QFileDialog,
+    QComboBox,
+)
 
 from gui.widgets import SkipOnlyDialog
 from gui.widgets.utilities import RunProgress
@@ -11,8 +19,9 @@ class DistributionsDialog(QDialog):
     """
     This dialog sets settings for saving plots of distributions to a pdf file
     """
-    CONTINUOUS_KIND_OPTIONS = ['count', 'box', 'violin', 'qq']
-    QUALITY_OPTIONS = ['low', 'medium', 'high']
+
+    CONTINUOUS_KIND_OPTIONS = ["count", "box", "violin", "qq"]
+    QUALITY_OPTIONS = ["low", "medium", "high"]
 
     def __init__(self, *args, **kwargs):
         super(DistributionsDialog, self).__init__(*args, **kwargs)
@@ -48,13 +57,17 @@ class DistributionsDialog(QDialog):
         sort = self.sort_variables
 
         def f():
-            clarite.plot.distributions(data=data,
-                                       filename=filename,
-                                       continuous_kind=continuous_kind,
-                                       nrows=nrows, ncols=ncols,
-                                       quality=quality,
-                                       variables=variables,
-                                       sort=sort)
+            clarite.plot.distributions(
+                data=data,
+                filename=filename,
+                continuous_kind=continuous_kind,
+                nrows=nrows,
+                ncols=ncols,
+                quality=quality,
+                variables=variables,
+                sort=sort,
+            )
+
         return f
 
     def setup_ui(self):
@@ -63,10 +76,12 @@ class DistributionsDialog(QDialog):
         self.setModal(True)
 
         layout = QFormLayout(self)
-        
+
         # Skip/Only
         self.skiponly_label = QLabel(self)
-        self.skiponly_label.setText(f"Using all {len(list(self.dataset.df)):,} variables")
+        self.skiponly_label.setText(
+            f"Using all {len(list(self.dataset.df)):,} variables"
+        )
         self.btn_skiponly = QPushButton("Edit", parent=self)
         self.btn_skiponly.clicked.connect(self.launch_skiponly)
         layout.addRow(self.skiponly_label, self.btn_skiponly)
@@ -75,7 +90,9 @@ class DistributionsDialog(QDialog):
         self.continuous_kind_cb = QComboBox(self)
         for option in self.CONTINUOUS_KIND_OPTIONS:
             self.continuous_kind_cb.addItem(option)
-        self.continuous_kind_cb.currentIndexChanged.connect(lambda idx: self.update_continuous_kind(idx))
+        self.continuous_kind_cb.currentIndexChanged.connect(
+            lambda idx: self.update_continuous_kind(idx)
+        )
         layout.addRow("Continuous Variable Plots", self.continuous_kind_cb)
 
         # Nrows
@@ -96,14 +113,16 @@ class DistributionsDialog(QDialog):
         self.quality_cb = QComboBox(self)
         for option in self.QUALITY_OPTIONS:
             self.quality_cb.addItem(option)
-        self.quality_cb.currentIndexChanged.connect(lambda idx: self.update_quality(idx))
+        self.quality_cb.currentIndexChanged.connect(
+            lambda idx: self.update_quality(idx)
+        )
         layout.addRow("Quality", self.quality_cb)
 
         # Sort
 
         # Ok/Cancel
         QBtn = QDialogButtonBox.Save | QDialogButtonBox.Cancel
-        
+
         self.buttonBox = QDialogButtonBox(QBtn)
         layout.addRow(self.buttonBox)
         self.buttonBox.accepted.connect(self.save)
@@ -116,9 +135,9 @@ class DistributionsDialog(QDialog):
     def launch_skiponly(self):
         """Launch a dialog to set skip/only"""
         # Update skip and only
-        text, self.skip, self.only = SkipOnlyDialog.get_skip_only(columns=list(self.dataset.df),
-                                                                  skip=self.skip, only=self.only,
-                                                                  parent=self)
+        text, self.skip, self.only = SkipOnlyDialog.get_skip_only(
+            columns=list(self.dataset.df), skip=self.skip, only=self.only, parent=self
+        )
         self.skiponly_label.setText(text)
 
     @pyqtSlot(int)
@@ -138,15 +157,17 @@ class DistributionsDialog(QDialog):
         self.ncols = n
 
     def save(self):
-        fileName = QFileDialog.getSaveFileName(self,
-                                               self.tr("Save file"), "",
-                                               self.tr("PDF files (*.pdf)"))[0]
+        fileName = QFileDialog.getSaveFileName(
+            self, self.tr("Save file"), "", self.tr("PDF files (*.pdf)")
+        )[0]
         if fileName:
             self.saved_filename = fileName
 
         # Generate and save the PDF
-        RunProgress.run_with_progress(progress_str="Saving PDF...",
-                                      function=self.get_func(),
-                                      slot=lambda: print("Saving PDF"),
-                                      parent=self)
+        RunProgress.run_with_progress(
+            progress_str="Saving PDF...",
+            function=self.get_func(),
+            slot=lambda: print("Saving PDF"),
+            parent=self,
+        )
         self.accept()

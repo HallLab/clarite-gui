@@ -9,13 +9,17 @@ class ColorPickerWidget(QWidget):
     """
     A color picker widget consisting of a name label and a button that updates when the color is changed
     """
+
     color_changed = pyqtSignal(QColor)
 
-    def __init__(self,
-                 label_text,
-                 initial_color: QColor = QColor.fromRgb(255, 255, 255),
-                 initial_font: QFont = QFont(),
-                 *args, **kwargs):
+    def __init__(
+        self,
+        label_text,
+        initial_color: QColor = QColor.fromRgb(255, 255, 255),
+        initial_font: QFont = QFont(),
+        *args,
+        **kwargs,
+    ):
         super(ColorPickerWidget, self).__init__(*args, **kwargs)
         self.label_text = label_text
         self.color = initial_color
@@ -56,7 +60,9 @@ class ColorPickerWidget(QWidget):
         if font is not None:
             self.font = font
         self.btn.setText(self.color.name())
-        self.btn.setStyleSheet(f"border: 1px solid black;"
-                               f"background-color: {self.color.name()};"
-                               f"padding: 5;")
+        self.btn.setStyleSheet(
+            f"border: 1px solid black;"
+            f"background-color: {self.color.name()};"
+            f"padding: 5;"
+        )
         self.btn.setFont(self.font)

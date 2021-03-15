@@ -1,5 +1,12 @@
 from PyQt5.QtGui import QTextCursor
-from PyQt5.QtWidgets import QVBoxLayout, QTextEdit, QHBoxLayout, QPushButton, QFileDialog, QWidget
+from PyQt5.QtWidgets import (
+    QVBoxLayout,
+    QTextEdit,
+    QHBoxLayout,
+    QPushButton,
+    QFileDialog,
+    QWidget,
+)
 
 from gui.widgets.utilities import RunProgress
 
@@ -8,7 +15,10 @@ class LogWidget(QWidget):
     """
     Widget that displays the log
     """
-    def __init__(self, filetype="Text Files (*.txt)", initial_log=None, *args, **kwargs):
+
+    def __init__(
+        self, filetype="Text Files (*.txt)", initial_log=None, *args, **kwargs
+    ):
         super(LogWidget, self).__init__(*args, **kwargs)
         self.messages = []
         self.appctx = self.parent().appctx  # Get App Context
@@ -74,8 +84,9 @@ class LogWidget(QWidget):
         """Save the log"""
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        filename, _ = QFileDialog.getSaveFileName(self, "QFileDialog.getSaveFileName()", "",
-                                                   self.filetype, options=options)
+        filename, _ = QFileDialog.getSaveFileName(
+            self, "QFileDialog.getSaveFileName()", "", self.filetype, options=options
+        )
 
         # Return without doing anything if a valid file wasn't selected
         if not filename:
@@ -85,10 +96,9 @@ class LogWidget(QWidget):
         log = self.messages
 
         def save_func():
-            with open(filename, 'w') as o:
+            with open(filename, "w") as o:
                 o.writelines(log)
 
-        RunProgress.run_with_progress(progress_str="Saving Log...",
-                                      function=save_func,
-                                      slot=None,
-                                      parent=self)
+        RunProgress.run_with_progress(
+            progress_str="Saving Log...", function=save_func, slot=None, parent=self
+        )

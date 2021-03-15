@@ -15,6 +15,7 @@ class AppContext:
     The data in the application context should only be modified via its methods.
     Each method that modifies data emits a signal with the same name to update the UI.
     """
+
     VERSION = "1.0.0"
     ORG = "Hall Lab"
     APPLICATION = "Clarite"
@@ -44,8 +45,6 @@ class AppContext:
         # Testing code:
         # test_df = pd.DataFrame({'a': [1, 2, 3], 'b': [4, 5, 6], 'c': [7, 8, 9]}).set_index('c')
         # self.add_dataset(Dataset("test", "dataset", test_df))
-        # disc_result = pd.read_csv("C:/Users/jrm5100/Documents/Projects/clarite-bmi-replication/results_Python/results/BMI_Discovery_Results.txt", sep="\t").set_index(['variable', 'phenotype'])
-        # self.add_dataset(Dataset("discovery_results", "ewas_result", disc_result))
         # repl_result = pd.read_csv("C:/Users/jrm5100/Documents/Projects/clarite-bmi-replication/results_Python/results/BMI_Replication_Results.txt", sep="\t").set_index(['variable', 'phenotype'])
         # self.add_dataset(Dataset("replication_results", "ewas_result", repl_result))
 
@@ -62,7 +61,7 @@ class AppContext:
         # Signal that a dataset was added
         self.signals.added_dataset.emit()
         # Change to the new dataset
-        self.change_dataset(len(self.datasets)-1)
+        self.change_dataset(len(self.datasets) - 1)
 
     def remove_current_dataset(self):
         """Remove a dataset"""
@@ -81,10 +80,12 @@ class AppContext:
 
         # Delete the dataset
         del self.datasets[del_idx]  # Actually delete the data
-        self.signals.removed_dataset.emit(del_idx)  # Signal the UI to update the combo list
+        self.signals.removed_dataset.emit(
+            del_idx
+        )  # Signal the UI to update the combo list
 
         # Log
-        self.log_info("\n" + "="*80 + f"\nDeleted '{dataset_name}'\n" + "="*80)
+        self.log_info("\n" + "=" * 80 + f"\nDeleted '{dataset_name}'\n" + "=" * 80)
         self.log_python(f"del {python_name}")
 
         # Update which dataset is selected

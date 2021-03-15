@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QMessageBox
 
+
 def show_warning(title, text):
     msgBox = QMessageBox()
     msgBox.setIcon(QMessageBox.Warning)
@@ -7,6 +8,7 @@ def show_warning(title, text):
     msgBox.setWindowTitle(title)
     msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
     returnValue = msgBox.exec()
+
 
 def show_critical(title, text):
     msgBox = QMessageBox()

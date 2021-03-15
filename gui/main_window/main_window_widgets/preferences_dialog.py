@@ -1,7 +1,18 @@
 from PyQt5.QtCore import QSettings, pyqtSignal
 from PyQt5.QtGui import QFont, QColor
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QTabWidget, QWidget, QGroupBox, QFormLayout, QLabel, \
-    QSpinBox, QHBoxLayout, QPushButton
+from PyQt5.QtWidgets import (
+    QDialog,
+    QDialogButtonBox,
+    QVBoxLayout,
+    QTabWidget,
+    QWidget,
+    QGroupBox,
+    QFormLayout,
+    QLabel,
+    QSpinBox,
+    QHBoxLayout,
+    QPushButton,
+)
 from gui.widgets.utilities import ColorPickerWidget, FontPickerWidget
 
 
@@ -69,6 +80,7 @@ class DisplayTab(QWidget):
     """
     Widget that holds the display settings.
     """
+
     # Settings groups controlled in this tab
     GROUP = "display"
 
@@ -80,11 +92,17 @@ class DisplayTab(QWidget):
 
     def load_default_settings(self):
         # display/header
-        self.header_font = QFont("sans-serif", pointSize=12, weight=QFont.Bold, italic=False)
+        self.header_font = QFont(
+            "sans-serif", pointSize=12, weight=QFont.Bold, italic=False
+        )
         # display/index
-        self.index_font = QFont("sans-serif", pointSize=10, weight=QFont.Normal, italic=False)
+        self.index_font = QFont(
+            "sans-serif", pointSize=10, weight=QFont.Normal, italic=False
+        )
         # display/data
-        self.data_font = QFont("sans-serif", pointSize=10, weight=QFont.Normal, italic=False)
+        self.data_font = QFont(
+            "sans-serif", pointSize=10, weight=QFont.Normal, italic=False
+        )
         self.data_bgcolor_unknown = QColor.fromRgb(255, 255, 255)
         self.data_bgcolor_binary = QColor.fromRgb(255, 204, 153)
         self.data_bgcolor_categorical = QColor.fromRgb(153, 204, 255)
@@ -113,14 +131,26 @@ class DisplayTab(QWidget):
         # Font
         self.data_font = QFont(settings.value("font", defaultValue=self.data_font))
         # Colors
-        self.data_bgcolor_unknown = QColor(settings.value("bgcolor_unknown", defaultValue=self.data_bgcolor_unknown))
-        self.data_bgcolor_binary = QColor(settings.value("bgcolor_binary", defaultValue=self.data_bgcolor_binary))
-        self.data_bgcolor_categorical = QColor(settings.value("bgcolor_categorical",
-                                                              defaultValue=self.data_bgcolor_categorical))
-        self.data_bgcolor_continuous = QColor(settings.value("bgcolor_continuous",
-                                                             defaultValue=self.data_bgcolor_continuous))
+        self.data_bgcolor_unknown = QColor(
+            settings.value("bgcolor_unknown", defaultValue=self.data_bgcolor_unknown)
+        )
+        self.data_bgcolor_binary = QColor(
+            settings.value("bgcolor_binary", defaultValue=self.data_bgcolor_binary)
+        )
+        self.data_bgcolor_categorical = QColor(
+            settings.value(
+                "bgcolor_categorical", defaultValue=self.data_bgcolor_categorical
+            )
+        )
+        self.data_bgcolor_continuous = QColor(
+            settings.value(
+                "bgcolor_continuous", defaultValue=self.data_bgcolor_continuous
+            )
+        )
         # Float Precision
-        self.data_float_precision = settings.value("float_precision", defaultValue=self.data_float_precision)
+        self.data_float_precision = settings.value(
+            "float_precision", defaultValue=self.data_float_precision
+        )
         settings.endGroup()
 
     def write_settings(self):
@@ -186,24 +216,32 @@ class DisplayTab(QWidget):
         # Background Colors
         table_data_layout.addWidget(QLabel("Data Type Colors:"))
         # Unknown
-        self.data_bgcolor_unknown_picker = ColorPickerWidget(label_text="\tUnknown",
-                                                             initial_color=self.data_bgcolor_unknown,
-                                                             initial_font=self.data_font)
+        self.data_bgcolor_unknown_picker = ColorPickerWidget(
+            label_text="\tUnknown",
+            initial_color=self.data_bgcolor_unknown,
+            initial_font=self.data_font,
+        )
         table_data_layout.addWidget(self.data_bgcolor_unknown_picker)
         # Binary
-        self.data_bgcolor_binary_picker = ColorPickerWidget(label_text="\tBinary",
-                                                            initial_color=self.data_bgcolor_binary,
-                                                            initial_font=self.data_font)
+        self.data_bgcolor_binary_picker = ColorPickerWidget(
+            label_text="\tBinary",
+            initial_color=self.data_bgcolor_binary,
+            initial_font=self.data_font,
+        )
         table_data_layout.addWidget(self.data_bgcolor_binary_picker)
         # Categorical
-        self.data_bgcolor_categorical_picker = ColorPickerWidget(label_text="\tCategorical",
-                                                                 initial_color=self.data_bgcolor_categorical,
-                                                                 initial_font=self.data_font)
+        self.data_bgcolor_categorical_picker = ColorPickerWidget(
+            label_text="\tCategorical",
+            initial_color=self.data_bgcolor_categorical,
+            initial_font=self.data_font,
+        )
         table_data_layout.addWidget(self.data_bgcolor_categorical_picker)
         # Continuous
-        self.data_bgcolor_continuous_picker = ColorPickerWidget(label_text="\tContinuous",
-                                                                initial_color=self.data_bgcolor_continuous,
-                                                                initial_font=self.data_font)
+        self.data_bgcolor_continuous_picker = ColorPickerWidget(
+            label_text="\tContinuous",
+            initial_color=self.data_bgcolor_continuous,
+            initial_font=self.data_font,
+        )
         table_data_layout.addWidget(self.data_bgcolor_continuous_picker)
 
         # Float precision
@@ -222,15 +260,31 @@ class DisplayTab(QWidget):
         self.index_font_picker.font_changed.connect(self.update_index_font)
         # Data - Font
         self.data_font_picker.font_changed.connect(self.update_data_font)
-        self.data_font_picker.font_changed.connect(lambda f: self.data_bgcolor_unknown_picker.refresh(font=f))
-        self.data_font_picker.font_changed.connect(lambda f: self.data_bgcolor_binary_picker.refresh(font=f))
-        self.data_font_picker.font_changed.connect(lambda f: self.data_bgcolor_categorical_picker.refresh(font=f))
-        self.data_font_picker.font_changed.connect(lambda f: self.data_bgcolor_continuous_picker.refresh(font=f))
+        self.data_font_picker.font_changed.connect(
+            lambda f: self.data_bgcolor_unknown_picker.refresh(font=f)
+        )
+        self.data_font_picker.font_changed.connect(
+            lambda f: self.data_bgcolor_binary_picker.refresh(font=f)
+        )
+        self.data_font_picker.font_changed.connect(
+            lambda f: self.data_bgcolor_categorical_picker.refresh(font=f)
+        )
+        self.data_font_picker.font_changed.connect(
+            lambda f: self.data_bgcolor_continuous_picker.refresh(font=f)
+        )
         # Data - Colors
-        self.data_bgcolor_unknown_picker.color_changed.connect(self.update_data_bgcolor_unknown)
-        self.data_bgcolor_binary_picker.color_changed.connect(self.update_data_bgcolor_binary)
-        self.data_bgcolor_categorical_picker.color_changed.connect(self.update_data_bgcolor_categorical)
-        self.data_bgcolor_continuous_picker.color_changed.connect(self.update_data_bgcolor_continuous)
+        self.data_bgcolor_unknown_picker.color_changed.connect(
+            self.update_data_bgcolor_unknown
+        )
+        self.data_bgcolor_binary_picker.color_changed.connect(
+            self.update_data_bgcolor_binary
+        )
+        self.data_bgcolor_categorical_picker.color_changed.connect(
+            self.update_data_bgcolor_categorical
+        )
+        self.data_bgcolor_continuous_picker.color_changed.connect(
+            self.update_data_bgcolor_continuous
+        )
         # Data - Precision
         self.float_precision_sb.valueChanged.connect(self.update_float_precision)
 
@@ -242,10 +296,18 @@ class DisplayTab(QWidget):
         self.index_font_picker.refresh(font=self.index_font)
         # Data
         self.data_font_picker.refresh(font=self.data_font)
-        self.data_bgcolor_unknown_picker.refresh(color=self.data_bgcolor_unknown, font=self.data_font)
-        self.data_bgcolor_binary_picker.refresh(color=self.data_bgcolor_binary, font=self.data_font)
-        self.data_bgcolor_categorical_picker.refresh(color=self.data_bgcolor_categorical, font=self.data_font)
-        self.data_bgcolor_continuous_picker.refresh(color=self.data_bgcolor_continuous, font=self.data_font)
+        self.data_bgcolor_unknown_picker.refresh(
+            color=self.data_bgcolor_unknown, font=self.data_font
+        )
+        self.data_bgcolor_binary_picker.refresh(
+            color=self.data_bgcolor_binary, font=self.data_font
+        )
+        self.data_bgcolor_categorical_picker.refresh(
+            color=self.data_bgcolor_categorical, font=self.data_font
+        )
+        self.data_bgcolor_continuous_picker.refresh(
+            color=self.data_bgcolor_continuous, font=self.data_font
+        )
         self.float_precision_sb.setValue(self.data_float_precision)
 
     # Setting update slots #

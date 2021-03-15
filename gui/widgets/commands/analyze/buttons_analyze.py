@@ -10,6 +10,7 @@ class AnalyzeButtons(QWidget):
     """
     Widget that holds the buttons for Describe commands
     """
+
     def __init__(self, *args, **kwargs):
         super(AnalyzeButtons, self).__init__(*args, **kwargs)
         self.appctx = self.parent().appctx
@@ -23,8 +24,12 @@ class AnalyzeButtons(QWidget):
 
     def add_button(self, text, dialog, layout, **kwargs):
         btn = QPushButton(text=text, parent=self)
-        btn.clicked.connect(lambda: dialog(parent=self.appctx.main_window, **kwargs).show())
-        btn.setEnabled(False)  # Start disabled until a dataset is loaded, triggering 'datasets changed'
+        btn.clicked.connect(
+            lambda: dialog(parent=self.appctx.main_window, **kwargs).show()
+        )
+        btn.setEnabled(
+            False
+        )  # Start disabled until a dataset is loaded, triggering 'datasets changed'
         layout.addWidget(btn)
         self.btn_dict[text] = btn
 
@@ -45,19 +50,21 @@ class AnalyzeButtons(QWidget):
         df_count = len(self.appctx.datasets)
         if df_count > 0:
             current_kind = self.appctx.datasets[self.appctx.current_dataset_idx].kind
-            current_columns = list(self.appctx.datasets[self.appctx.current_dataset_idx].df)
+            current_columns = list(
+                self.appctx.datasets[self.appctx.current_dataset_idx].df
+            )
         else:
             current_kind = None
             current_columns = []
 
         # Current df must be a dataset for ewas
-        if current_kind != 'dataset':
-            self.btn_dict['EWAS'].setEnabled(False)
+        if current_kind != "dataset":
+            self.btn_dict["EWAS"].setEnabled(False)
         else:
-            self.btn_dict['EWAS'].setEnabled(True)
+            self.btn_dict["EWAS"].setEnabled(True)
 
         # Must have pvalue column to add corrected pvalues
-        if 'pvalue' in current_columns and 'converged' in current_columns:
-            self.btn_dict['Add Corrected Pvalues'].setEnabled(True)
+        if "pvalue" in current_columns and "converged" in current_columns:
+            self.btn_dict["Add Corrected Pvalues"].setEnabled(True)
         else:
-            self.btn_dict['Add Corrected Pvalues'].setEnabled(False)
+            self.btn_dict["Add Corrected Pvalues"].setEnabled(False)

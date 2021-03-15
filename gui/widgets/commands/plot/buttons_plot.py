@@ -12,6 +12,7 @@ class PlotButtons(QWidget):
     """
     Widget that holds the buttons for Describe commands
     """
+
     def __init__(self, *args, **kwargs):
         super(PlotButtons, self).__init__(*args, **kwargs)
         self.appctx = self.parent().appctx
@@ -25,8 +26,12 @@ class PlotButtons(QWidget):
 
     def add_button(self, text, dialog, layout, **kwargs):
         btn = QPushButton(text=text, parent=self)
-        btn.clicked.connect(lambda: dialog(parent=self.appctx.main_window, **kwargs).show())
-        btn.setEnabled(False)  # Start disabled until a dataset is loaded, triggering 'datasets changed'
+        btn.clicked.connect(
+            lambda: dialog(parent=self.appctx.main_window, **kwargs).show()
+        )
+        btn.setEnabled(
+            False
+        )  # Start disabled until a dataset is loaded, triggering 'datasets changed'
         layout.addWidget(btn)
         self.btn_dict[text] = btn
 
@@ -53,9 +58,9 @@ class PlotButtons(QWidget):
             current_kind = None
 
         # Current df must be a dataset for some plots
-        for b in ['Histogram', 'Distributions']:
+        for b in ["Histogram", "Distributions"]:
             btn = self.btn_dict[b]
-            if current_kind != 'dataset':
+            if current_kind != "dataset":
                 btn.setEnabled(False)
             else:
                 btn.setEnabled(True)
@@ -64,7 +69,7 @@ class PlotButtons(QWidget):
         # TODO: Update to make more flexible (don't need to match kind, just certain columns)
         manhattan_btn = self.btn_dict["Manhattan"]
         top_result_btn = self.btn_dict["Top Results"]
-        num_results = len([d for d in self.appctx.datasets if d.kind == 'ewas_result'])
+        num_results = len([d for d in self.appctx.datasets if d.kind == "ewas_result"])
         if num_results > 0:
             manhattan_btn.setEnabled(True)
             top_result_btn.setEnabled(True)

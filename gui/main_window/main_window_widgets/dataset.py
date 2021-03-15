@@ -3,7 +3,15 @@ from pathlib import Path
 
 from PyQt5.QtCore import pyqtSlot, Qt, QSettings, QSize
 from PyQt5.QtGui import QColor, QPixmap
-from PyQt5.QtWidgets import QGroupBox, QHBoxLayout, QVBoxLayout, QComboBox, QLabel, QPushButton, QFileDialog
+from PyQt5.QtWidgets import (
+    QGroupBox,
+    QHBoxLayout,
+    QVBoxLayout,
+    QComboBox,
+    QLabel,
+    QPushButton,
+    QFileDialog,
+)
 
 from gui.main_window.main_window_widgets.dataset_table_view import DatasetTableView
 from gui.models import PandasDFModel
@@ -19,7 +27,9 @@ class DatasetWidget(QGroupBox):
     def __init__(self, *args, **kwargs):
         super(DatasetWidget, self).__init__(*args, **kwargs)
         self.appctx = self.parent().appctx  # Get App Context
-        self.appctx.dataset_widget = self  # Add reference to this widget to the app context
+        self.appctx.dataset_widget = (
+            self  # Add reference to this widget to the app context
+        )
         self.setTitle("Current Dataset")
         self.setup_ui()
         self.connect_ui_signals()
@@ -29,14 +39,24 @@ class DatasetWidget(QGroupBox):
         settings = QSettings(self.appctx.ORG, self.appctx.APPLICATION)
         settings.beginGroup("display/data")
         data_colors = dict()
-        data_colors["Unknown"] = QColor(settings.value("bgcolor_unknown",
-                                                       defaultValue=QColor.fromRgb(255, 255, 255)))
-        data_colors["Binary"] = QColor(settings.value("bgcolor_binary",
-                                                      defaultValue=QColor.fromRgb(255, 204, 153)))
-        data_colors["Categorical"] = QColor(settings.value("bgcolor_categorical",
-                                                           defaultValue=QColor.fromRgb(153, 204, 255)))
-        data_colors["Continuous"] = QColor(settings.value("bgcolor_continuous",
-                                                          defaultValue=QColor.fromRgb(204, 153, 255)))
+        data_colors["Unknown"] = QColor(
+            settings.value(
+                "bgcolor_unknown", defaultValue=QColor.fromRgb(255, 255, 255)
+            )
+        )
+        data_colors["Binary"] = QColor(
+            settings.value("bgcolor_binary", defaultValue=QColor.fromRgb(255, 204, 153))
+        )
+        data_colors["Categorical"] = QColor(
+            settings.value(
+                "bgcolor_categorical", defaultValue=QColor.fromRgb(153, 204, 255)
+            )
+        )
+        data_colors["Continuous"] = QColor(
+            settings.value(
+                "bgcolor_continuous", defaultValue=QColor.fromRgb(204, 153, 255)
+            )
+        )
         settings.endGroup()
 
         return data_colors
@@ -110,13 +130,17 @@ class DatasetWidget(QGroupBox):
         self.data_colors = self.read_color_settings()  # for drawing the legend
         for label_text, color in self.data_colors.items():
             qlabel = self.legend_labels[label_text]
-            qlabel.setStyleSheet(f"border: 1px solid black;"
-                                 f"background-color: {color.name()};"
-                                 f"padding: 5;")
+            qlabel.setStyleSheet(
+                f"border: 1px solid black;"
+                f"background-color: {color.name()};"
+                f"padding: 5;"
+            )
 
     def connect_ui_signals(self):
         """Signals from the UI in this widget call methods in the appcontext"""
-        self.data_selector.currentIndexChanged.connect(lambda idx: self.appctx.change_dataset(idx))
+        self.data_selector.currentIndexChanged.connect(
+            lambda idx: self.appctx.change_dataset(idx)
+        )
         self.btn_save_as.clicked.connect(self.save_dataset)
         self.btn_delete.clicked.connect(self.delete_dataset)
 
@@ -170,7 +194,7 @@ class DatasetWidget(QGroupBox):
         # Refresh the model
         self.data_model.refresh()
         # Update the legend labels
-        if self.data_model.kind == 'dataset':
+        if self.data_model.kind == "dataset":
             self.hide_legend(False)
         else:
             self.hide_legend(True)
@@ -203,8 +227,13 @@ class DatasetWidget(QGroupBox):
         """
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        filename, _ = QFileDialog.getSaveFileName(self, "QFileDialog.getSaveFileName()", "",
-                                                   "All Files (*);;Text Files (*.txt)", options=options)
+        filename, _ = QFileDialog.getSaveFileName(
+            self,
+            "QFileDialog.getSaveFileName()",
+            "",
+            "All Files (*);;Text Files (*.txt)",
+            options=options,
+        )
 
         # Return without doing anything if a valid file wasn't selected
         if not filename:
@@ -217,35 +246,46 @@ class DatasetWidget(QGroupBox):
             # Save Data
             dataset.df.to_csv(filename, sep="\t")
             # Save Dtypes
-            dtypes = {variable_name: {'type': str(dtype)} if str(dtype) != 'category'
-            else {'type': str(dtype),
-                  'categories': list(dtype.categories.values.tolist()),
-                  'ordered': dtype.ordered}
-                      for variable_name, dtype in dataset.df.dtypes.iteritems()}
+            dtypes = {
+                variable_name: {"type": str(dtype)}
+                if str(dtype) != "category"
+                else {
+                    "type": str(dtype),
+                    "categories": list(dtype.categories.values.tolist()),
+                    "ordered": dtype.ordered,
+                }
+                for variable_name, dtype in dataset.df.dtypes.iteritems()
+            }
             dtypes_filename = filename + ".dtypes"
             dtypes_file = Path(dtypes_filename)
-            with dtypes_file.open('w') as f:
+            with dtypes_file.open("w") as f:
                 json.dump(dtypes, f)
 
-        RunProgress.run_with_progress(progress_str="Saving Data...",
-                                      function=save_func,
-                                      slot=None,
-                                      parent=self)
+        RunProgress.run_with_progress(
+            progress_str="Saving Data...", function=save_func, slot=None, parent=self
+        )
 
         # Log Info
-        save_str = f"\nSaved {len(dataset.df):,} observations of {len(list(dataset.df)):,} variables" \
-                   f" in '{dataset.get_selector_name()}' to '{filename}'\n"
+        save_str = (
+            f"\nSaved {len(dataset.df):,} observations of {len(list(dataset.df)):,} variables"
+            f" in '{dataset.get_selector_name()}' to '{filename}'\n"
+        )
         self.appctx.log_info("\n" + "=" * 80 + save_str + "=" * 80)
 
         # Log Python
-        self.appctx.log_python(f"# Save data and it's associated datatypes\n"
-                               f"{dataset.get_python_name()}.to_csv({filename}, sep='\t')\n")
+        self.appctx.log_python(
+            f"# Save data and it's associated datatypes\n"
+            f"{dataset.get_python_name()}.to_csv({filename}, sep='\t')\n"
+        )
 
     @pyqtSlot()
     def delete_dataset(self):
-        del_name = self.appctx.datasets[self.appctx.current_dataset_idx].get_selector_name()
-        confirm_click(parent=self,
-                      txt="Are you sure you want to delete this dataset?",
-                      inform_txt=del_name,
-                      button_slots={'Yes': self.appctx.remove_current_dataset,
-                                    'No': None})
+        del_name = self.appctx.datasets[
+            self.appctx.current_dataset_idx
+        ].get_selector_name()
+        confirm_click(
+            parent=self,
+            txt="Are you sure you want to delete this dataset?",
+            inform_txt=del_name,
+            button_slots={"Yes": self.appctx.remove_current_dataset, "No": None},
+        )

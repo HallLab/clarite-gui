@@ -9,6 +9,7 @@ class DropExtraCatDialog(QDialog):
     """
     This dialog sets settings for the make_<type> functions
     """
+
     def __init__(self, *args, **kwargs):
         super(DropExtraCatDialog, self).__init__(*args, **kwargs)
         self.appctx = self.parent().appctx
@@ -33,10 +34,12 @@ class DropExtraCatDialog(QDialog):
 
     def log_command(self):
         dataset_name = self.dataset.get_python_name()  # Original selected data
-        self.appctx.log_python(f"{dataset_name} = clarite.modify.drop_extra_categories("
-                               f"data={dataset_name}, "
-                               f"skip={self.skip}, "
-                               f"only={self.only})")
+        self.appctx.log_python(
+            f"{dataset_name} = clarite.modify.drop_extra_categories("
+            f"data={dataset_name}, "
+            f"skip={self.skip}, "
+            f"only={self.only})"
+        )
 
     def setup_ui(self):
         self.setWindowTitle(f"Drop Extra Categories")
@@ -44,17 +47,19 @@ class DropExtraCatDialog(QDialog):
         self.setModal(True)
 
         layout = QFormLayout(self)
-        
+
         # Skip/Only
         self.skiponly_label = QLabel(self)
-        self.skiponly_label.setText(f"Using all {len(list(self.dataset.df)):,} variables")
+        self.skiponly_label.setText(
+            f"Using all {len(list(self.dataset.df)):,} variables"
+        )
         self.btn_skiponly = QPushButton("Edit", parent=self)
         self.btn_skiponly.clicked.connect(self.launch_skiponly)
         layout.addRow(self.skiponly_label, self.btn_skiponly)
 
-        # Ok/Cancel       
+        # Ok/Cancel
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        
+
         self.buttonBox = QDialogButtonBox(QBtn)
         layout.addRow(self.buttonBox)
         self.buttonBox.accepted.connect(self.submit)
@@ -67,16 +72,18 @@ class DropExtraCatDialog(QDialog):
     def launch_skiponly(self):
         """Launch a dialog to set skip/only"""
         # Update skip and only
-        text, self.skip, self.only = SkipOnlyDialog.get_skip_only(columns=list(self.dataset.df),
-                                                                  skip=self.skip, only=self.only,
-                                                                  parent=self)
+        text, self.skip, self.only = SkipOnlyDialog.get_skip_only(
+            columns=list(self.dataset.df), skip=self.skip, only=self.only, parent=self
+        )
         self.skiponly_label.setText(text)
 
     def submit(self):
         # Run with a progress dialog
-        RunProgress.run_with_progress(progress_str="Dropping extra categories...",
-                                      function=self.get_func(),
-                                      slot=self.appctx.update_data,
-                                      parent=self)
+        RunProgress.run_with_progress(
+            progress_str="Dropping extra categories...",
+            function=self.get_func(),
+            slot=self.appctx.update_data,
+            parent=self,
+        )
         self.log_command()
         self.accept()

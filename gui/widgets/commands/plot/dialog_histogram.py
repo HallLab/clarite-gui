@@ -1,9 +1,19 @@
 import clarite
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QDialog, QFormLayout, QDialogButtonBox, QHBoxLayout, \
-    QVBoxLayout, QPushButton, QGroupBox, QSpinBox
-from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg as FigureCanvas,
-                                                NavigationToolbar2QT as NavigationToolbar)
+from PyQt5.QtWidgets import (
+    QDialog,
+    QFormLayout,
+    QDialogButtonBox,
+    QHBoxLayout,
+    QVBoxLayout,
+    QPushButton,
+    QGroupBox,
+    QSpinBox,
+)
+from matplotlib.backends.backend_qt5agg import (
+    FigureCanvasQTAgg as FigureCanvas,
+    NavigationToolbar2QT as NavigationToolbar,
+)
 from matplotlib.figure import Figure
 
 from gui.widgets.select_column_dialog import SelectColumnDialog
@@ -13,6 +23,7 @@ class HistogramDialog(QDialog):
     """
     This dialog controls settings for plotting a histogram and displays it
     """
+
     def __init__(self, *args, **kwargs):
         super(HistogramDialog, self).__init__(*args, **kwargs)
         self.appctx = self.parent().appctx
@@ -59,9 +70,9 @@ class HistogramDialog(QDialog):
         self.update_bin_setting()
         left_layout.addRow("Number of Bins", self.bins_sb)
 
-        # Ok/Cancel       
+        # Ok/Cancel
         QBtn = QDialogButtonBox.Close
-        
+
         self.buttonBox = QDialogButtonBox(QBtn)
         right_layout.addWidget(self.buttonBox)
         self.buttonBox.rejected.connect(self.reject)
@@ -75,9 +86,9 @@ class HistogramDialog(QDialog):
 
     def launch_get_column(self):
         """Launch a dialog to set the plotted column from the dataset"""
-        column = SelectColumnDialog.get_column(columns=list(self.dataset.df),
-                                               selected=self.column,
-                                               parent=self)
+        column = SelectColumnDialog.get_column(
+            columns=list(self.dataset.df), selected=self.column, parent=self
+        )
         if column is not None:
             self.column = column
             self.column_btn.setText(f"{self.column}")
@@ -87,7 +98,7 @@ class HistogramDialog(QDialog):
     def update_bin_setting(self):
         var_type = self.dataset.get_types()[self.column]
         var_unique_vals = self.dataset.df[self.column].nunique()
-        if var_type == 'categorical':
+        if var_type == "categorical":
             self.bins_sb.setEnabled(False)
             self.bins_sb.setRange(1, var_unique_vals)
             self.bins_sb.setValue(var_unique_vals)
@@ -98,12 +109,16 @@ class HistogramDialog(QDialog):
 
     def update_canvas(self):
         self.canvas.figure.clear()
-        clarite.plot.histogram(data=self.dataset.df, column=self.column, title=f"Histogram of {self.column}",
-                               figure=self.canvas.figure, bins=self.bins)
+        clarite.plot.histogram(
+            data=self.dataset.df,
+            column=self.column,
+            title=f"Histogram of {self.column}",
+            figure=self.canvas.figure,
+            bins=self.bins,
+        )
         self.canvas.draw()
 
     @pyqtSlot(int)
     def update_bin_num(self, value):
         self.bins = value
         self.update_canvas()
-

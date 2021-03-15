@@ -3,11 +3,28 @@ from typing import Optional
 import clarite
 import pandas as pd
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QDialog, QLabel, QFormLayout, QDialogButtonBox, QHBoxLayout, \
-    QVBoxLayout, QPushButton, QGroupBox, QListWidget, QAbstractItemView, QFileDialog, QSpinBox, QComboBox, QCheckBox, \
-    QDoubleSpinBox, QWidget
-from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg as FigureCanvas,
-                                                NavigationToolbar2QT as NavigationToolbar)
+from PyQt5.QtWidgets import (
+    QDialog,
+    QLabel,
+    QFormLayout,
+    QDialogButtonBox,
+    QHBoxLayout,
+    QVBoxLayout,
+    QPushButton,
+    QGroupBox,
+    QListWidget,
+    QAbstractItemView,
+    QFileDialog,
+    QSpinBox,
+    QComboBox,
+    QCheckBox,
+    QDoubleSpinBox,
+    QWidget,
+)
+from matplotlib.backends.backend_qt5agg import (
+    FigureCanvasQTAgg as FigureCanvas,
+    NavigationToolbar2QT as NavigationToolbar,
+)
 from matplotlib.figure import Figure
 
 from gui.models import Dataset
@@ -68,10 +85,12 @@ class TopResultsPlotDialog(QDialog):
         self.dataset_listwidget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.dataset_map = dict()
         for all_dataset_idx, ds in enumerate(self.appctx.datasets):
-            if ds.kind == 'ewas_result':
+            if ds.kind == "ewas_result":
                 self.dataset_listwidget.addItem(ds.name)
-                self.dataset_map[len(self.dataset_listwidget) -1] = all_dataset_idx
-        self.dataset_listwidget.itemSelectionChanged.connect(self.update_dataset_selection)
+                self.dataset_map[len(self.dataset_listwidget) - 1] = all_dataset_idx
+        self.dataset_listwidget.itemSelectionChanged.connect(
+            self.update_dataset_selection
+        )
         left_layout.addRow(self.dataset_listwidget)
 
         left_layout.addRow(QHLine())
@@ -80,7 +99,9 @@ class TopResultsPlotDialog(QDialog):
         self.pvalue_type_combobox = QComboBox(self)
         for option in self.PVALUE_TYPES:
             self.pvalue_type_combobox.addItem(option)
-        self.pvalue_type_combobox.currentIndexChanged.connect(lambda idx: self.update_pvalue_type(idx))
+        self.pvalue_type_combobox.currentIndexChanged.connect(
+            lambda idx: self.update_pvalue_type(idx)
+        )
         left_layout.addRow("Pvalue Type", self.pvalue_type_combobox)
 
         # Cutoff
@@ -115,7 +136,7 @@ class TopResultsPlotDialog(QDialog):
         left_layout.addRow(self.update_plot_btn)
         self.update_plot_btn.clicked.connect(self.update_canvas)
 
-        # Ok/Cancel       
+        # Ok/Cancel
         QBtn = QDialogButtonBox.Close
 
         self.buttonBox = QDialogButtonBox(QBtn)
@@ -139,12 +160,14 @@ class TopResultsPlotDialog(QDialog):
 
         title = f"Top Results for {self.dataset.name}"
 
-        clarite.plot.top_results(ewas_result=self.dataset.df,
-                                 pvalue_name=pvalue_name,
-                                 cutoff=self.cutoff,
-                                 num_rows=self.num_rows,
-                                 figure=self.canvas.figure,
-                                 title=title)
+        clarite.plot.top_results(
+            ewas_result=self.dataset.df,
+            pvalue_name=pvalue_name,
+            cutoff=self.cutoff,
+            num_rows=self.num_rows,
+            figure=self.canvas.figure,
+            title=title,
+        )
 
         self.canvas.draw()
 

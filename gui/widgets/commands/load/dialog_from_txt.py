@@ -1,7 +1,14 @@
 from pathlib import Path
 
 import clarite
-from PyQt5.QtWidgets import QDialog, QFileDialog, QDialogButtonBox, QFormLayout, QPushButton, QLineEdit
+from PyQt5.QtWidgets import (
+    QDialog,
+    QFileDialog,
+    QDialogButtonBox,
+    QFormLayout,
+    QPushButton,
+    QLineEdit,
+)
 
 from gui.models import Dataset
 from gui.widgets.utilities import warnings, RunProgress
@@ -14,11 +21,12 @@ class FromTxtDialog(QDialog):
        - tsv (tab-separated)
        - csv (comma-separated)
     """
+
     def __init__(self, kind, *args, **kwargs):
         super(FromTxtDialog, self).__init__(*args, **kwargs)
         self.appctx = self.parent().appctx
         # Kind of file being loaded
-        if kind not in {'CSV', 'TSV'}:
+        if kind not in {"CSV", "TSV"}:
             raise ValueError(f"{kind} isn't a supported file loader")
         else:
             self.kind = kind
@@ -39,26 +47,30 @@ class FromTxtDialog(QDialog):
 
         # Get Function
         def f():
-            if kind == 'CSV':
+            if kind == "CSV":
                 df = clarite.load.from_csv(filename, index_col)
-            elif kind == 'TSV':
+            elif kind == "TSV":
                 df = clarite.load.from_tsv(filename, index_col)
-            return Dataset(data_name, 'dataset', df)
+            return Dataset(data_name, "dataset", df)
 
         return f
 
     def log_command(self):
         # Log the addition of the dataset (The new dataset is the current one)
-        dataset_name = self.appctx.datasets[self.appctx.current_dataset_idx].get_python_name()
+        dataset_name = self.appctx.datasets[
+            self.appctx.current_dataset_idx
+        ].get_python_name()
         # Get index col, wrapping strings in quotes
         index_col = repr(self.index_col)
         # Log the command
         if self.kind == "CSV":
             self.appctx.log_python(
-                f"{dataset_name} = clarite.load.from_csv(filename='{self.filename}', index_col={index_col})")
-        elif self.kind == 'TSV':
+                f"{dataset_name} = clarite.load.from_csv(filename='{self.filename}', index_col={index_col})"
+            )
+        elif self.kind == "TSV":
             self.appctx.log_python(
-                f"{dataset_name} = clarite.load.from_tsv(filename='{self.filename}', index_col={index_col})")
+                f"{dataset_name} = clarite.load.from_tsv(filename='{self.filename}', index_col={index_col})"
+            )
 
     def setup_ui(self):
         self.setWindowTitle(f"Load - From {self.kind}")
@@ -72,28 +84,28 @@ class FromTxtDialog(QDialog):
         self.btn_select_file.clicked.connect(self.launch_dlg_get_file)
         self.layout.addWidget(self.btn_select_file)
 
-        # Filename        
+        # Filename
         self.le_selected_file = QLineEdit(self.filename)
         self.le_selected_file.setPlaceholderText(f"{self.kind} File")
         self.le_selected_file.textChanged.connect(self.update_filename)
 
         self.layout.addRow("Filename: ", self.le_selected_file)
 
-        # Data Name       
+        # Data Name
         self.le_data_name = QLineEdit(self.data_name)
         self.le_data_name.setPlaceholderText("")
         self.le_data_name.textChanged.connect(self.update_data_name)
         self.layout.addRow("Dataset Name: ", self.le_data_name)
 
-        # Index Column       
+        # Index Column
         self.le_index_col = QLineEdit(self.filename)
         self.le_index_col.setPlaceholderText("None (Use first column)")
         self.le_index_col.textChanged.connect(self.update_index_col)
         self.layout.addRow("Index Column Name: ", self.le_index_col)
 
-        # Ok/Cancel       
+        # Ok/Cancel
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        
+
         self.buttonBox = QDialogButtonBox(QBtn)
         self.buttonBox.accepted.connect(self.submit)
         self.buttonBox.rejected.connect(self.reject)
@@ -108,19 +120,27 @@ class FromTxtDialog(QDialog):
             return
         datafile = Path(self.filename)
         if not datafile.exists():
-            warnings.show_warning(title="File Not Found",
-                                  text=f"The file could not be found:\n'{str(datafile)}''")
+            warnings.show_warning(
+                title="File Not Found",
+                text=f"The file could not be found:\n'{str(datafile)}''",
+            )
         elif not datafile.is_file():
-            warnings.show_warning(title="Not a File",
-                                  text=f"A folder was given instead of a file:\n'{str(datafile)}''")
+            warnings.show_warning(
+                title="Not a File",
+                text=f"A folder was given instead of a file:\n'{str(datafile)}''",
+            )
         elif self.data_name in [d.name for d in self.appctx.datasets]:
-            warnings.show_warning(title="Dataset already exists",
-                                  text=f"A dataset named '{self.data_name}' already exists.  Use a different name.")
+            warnings.show_warning(
+                title="Dataset already exists",
+                text=f"A dataset named '{self.data_name}' already exists.  Use a different name.",
+            )
         else:
-            RunProgress.run_with_progress(progress_str=f"Loading {self.kind} file...",
-                                          function=self.get_func(),
-                                          slot=self.appctx.add_dataset,
-                                          parent=self)
+            RunProgress.run_with_progress(
+                progress_str=f"Loading {self.kind} file...",
+                function=self.get_func(),
+                slot=self.appctx.add_dataset,
+                parent=self,
+            )
             self.log_command()
             self.accept()
 
@@ -157,11 +177,13 @@ class FromTxtDialog(QDialog):
         """Launch a dialog to select the file"""
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        filename, _ = QFileDialog.getOpenFileName(self,
-                                                  f"Load - From {self.kind} File",
-                                                  "",
-                                                  f"{self.kind} Files (*.{self.kind.lower()} *.txt)",
-                                                  options=options)
+        filename, _ = QFileDialog.getOpenFileName(
+            self,
+            f"Load - From {self.kind} File",
+            "",
+            f"{self.kind} Files (*.{self.kind.lower()} *.txt)",
+            options=options,
+        )
         # Set filename
         self.le_selected_file.setText(filename)
         return

@@ -2,8 +2,18 @@ import clarite
 import numpy as np
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtGui import QIntValidator, QDoubleValidator
-from PyQt5.QtWidgets import QDialog, QLabel, QFormLayout, QDialogButtonBox, QPushButton, QLineEdit, QGroupBox, \
-    QHBoxLayout, QVBoxLayout, QRadioButton
+from PyQt5.QtWidgets import (
+    QDialog,
+    QLabel,
+    QFormLayout,
+    QDialogButtonBox,
+    QPushButton,
+    QLineEdit,
+    QGroupBox,
+    QHBoxLayout,
+    QVBoxLayout,
+    QRadioButton,
+)
 
 from gui.models import Dataset
 from gui.widgets import SkipOnlyDialog
@@ -14,6 +24,7 @@ class RecodeValuesDialog(QDialog):
     """
     This dialog sets settings for recoding values
     """
+
     def __init__(self, *args, **kwargs):
         super(RecodeValuesDialog, self).__init__(*args, **kwargs)
         self.appctx = self.parent().appctx
@@ -37,18 +48,21 @@ class RecodeValuesDialog(QDialog):
 
         # Build the function
         def f():
-            result = clarite.modify.recode_values(data=data, replacement_dict=replacement_dict,
-                                                  skip=skip, only=only)
+            result = clarite.modify.recode_values(
+                data=data, replacement_dict=replacement_dict, skip=skip, only=only
+            )
             if data_name is None:
                 return result
             else:
-                return Dataset(data_name, 'dataset', result)
+                return Dataset(data_name, "dataset", result)
 
         return f
 
     def log_command(self):
         old_data_name = self.dataset.get_python_name()  # Original selected data
-        new_data_name = self.appctx.datasets[self.appctx.current_dataset_idx].get_python_name()  # New selected data
+        new_data_name = self.appctx.datasets[
+            self.appctx.current_dataset_idx
+        ].get_python_name()  # New selected data
         # Write 'None' instead of 'np.nan'
         if np.isnan(self.from_value):
             from_value = None
@@ -59,11 +73,13 @@ class RecodeValuesDialog(QDialog):
         else:
             to_value = self.to_value
         # Log
-        self.appctx.log_python(f"{new_data_name} = clarite.modify.recode_values("
-                               f"data={old_data_name}, "
-                               f"replacement_dict={repr({from_value: to_value})}, "
-                               f"skip={self.skip}, "
-                               f"only={self.only})")
+        self.appctx.log_python(
+            f"{new_data_name} = clarite.modify.recode_values("
+            f"data={old_data_name}, "
+            f"replacement_dict={repr({from_value: to_value})}, "
+            f"skip={self.skip}, "
+            f"only={self.only})"
+        )
 
     def setup_ui(self):
         self.setWindowTitle(f"Recode Values")
@@ -71,17 +87,21 @@ class RecodeValuesDialog(QDialog):
         self.setModal(True)
 
         layout = QFormLayout(self)
-        
+
         # Skip/Only
         self.skiponly_label = QLabel(self)
-        self.skiponly_label.setText(f"Using all {len(list(self.dataset.df)):,} variables")
+        self.skiponly_label.setText(
+            f"Using all {len(list(self.dataset.df)):,} variables"
+        )
         self.btn_skiponly = QPushButton("Edit", parent=self)
         self.btn_skiponly.clicked.connect(self.launch_skiponly)
         layout.addRow(self.skiponly_label, self.btn_skiponly)
 
-        # Data Name       
+        # Data Name
         self.le_data_name = QLineEdit(self.data_name)
-        self.le_data_name.setPlaceholderText(self.appctx.datasets[self.appctx.current_dataset_idx].name)
+        self.le_data_name.setPlaceholderText(
+            self.appctx.datasets[self.appctx.current_dataset_idx].name
+        )
         self.le_data_name.textChanged.connect(self.update_data_name)
         layout.addRow("Save Dataset Name: ", self.le_data_name)
 
@@ -101,10 +121,18 @@ class RecodeValuesDialog(QDialog):
         self.from_kind_None = QRadioButton("None", parent=self)
 
         # Disable input when "None" is selected and use validators
-        self.from_kind_int.clicked.connect(lambda: self.update_input_type(self.from_input, 'int'))
-        self.from_kind_float.clicked.connect(lambda: self.update_input_type(self.from_input, 'float'))
-        self.from_kind_string.clicked.connect(lambda: self.update_input_type(self.from_input, 'str'))
-        self.from_kind_None.clicked.connect(lambda: self.update_input_type(self.from_input, None))
+        self.from_kind_int.clicked.connect(
+            lambda: self.update_input_type(self.from_input, "int")
+        )
+        self.from_kind_float.clicked.connect(
+            lambda: self.update_input_type(self.from_input, "float")
+        )
+        self.from_kind_string.clicked.connect(
+            lambda: self.update_input_type(self.from_input, "str")
+        )
+        self.from_kind_None.clicked.connect(
+            lambda: self.update_input_type(self.from_input, None)
+        )
 
         from_group_layout.addWidget(self.from_input)
         from_group_layout.addWidget(self.from_kind_int)
@@ -127,10 +155,18 @@ class RecodeValuesDialog(QDialog):
         self.to_kind_None = QRadioButton("None", parent=self)
 
         # Disable input when "None" is selected and use validators
-        self.to_kind_int.clicked.connect(lambda: self.update_input_type(self.to_input, 'int'))
-        self.to_kind_float.clicked.connect(lambda: self.update_input_type(self.to_input, 'float'))
-        self.to_kind_string.clicked.connect(lambda: self.update_input_type(self.to_input, 'str'))
-        self.to_kind_None.clicked.connect(lambda: self.update_input_type(self.to_input, None))
+        self.to_kind_int.clicked.connect(
+            lambda: self.update_input_type(self.to_input, "int")
+        )
+        self.to_kind_float.clicked.connect(
+            lambda: self.update_input_type(self.to_input, "float")
+        )
+        self.to_kind_string.clicked.connect(
+            lambda: self.update_input_type(self.to_input, "str")
+        )
+        self.to_kind_None.clicked.connect(
+            lambda: self.update_input_type(self.to_input, None)
+        )
 
         to_group_layout.addWidget(self.to_input)
         to_group_layout.addWidget(self.to_kind_int)
@@ -143,9 +179,9 @@ class RecodeValuesDialog(QDialog):
         # Add to main layout
         layout.addRow(values_layout)
 
-        # Ok/Cancel       
+        # Ok/Cancel
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        
+
         self.buttonBox = QDialogButtonBox(QBtn)
         layout.addRow(self.buttonBox)
         self.buttonBox.accepted.connect(self.submit)
@@ -159,7 +195,7 @@ class RecodeValuesDialog(QDialog):
     def update_input_type(input, type):
         """Update the value input depending on the selected type"""
         # Enable/Disable based on "None" being selected
-        if type in ('int', 'float', 'str'):
+        if type in ("int", "float", "str"):
             input.setEnabled(True)
         else:
             input.setEnabled(False)
@@ -168,13 +204,12 @@ class RecodeValuesDialog(QDialog):
         input.clear()
 
         # Validators
-        if type == 'int':
+        if type == "int":
             input.setValidator(QIntValidator())
-        elif type == 'float':
+        elif type == "float":
             input.setValidator(QDoubleValidator())
         else:
             input.setValidator(None)  # No validation
-
 
     def update_data_name(self):
         text = self.le_data_name.text()
@@ -194,9 +229,9 @@ class RecodeValuesDialog(QDialog):
     def launch_skiponly(self):
         """Launch a dialog to set skip/only"""
         # Update skip and only
-        text, self.skip, self.only = SkipOnlyDialog.get_skip_only(columns=list(self.dataset.df),
-                                                                  skip=self.skip, only=self.only,
-                                                                  parent=self)
+        text, self.skip, self.only = SkipOnlyDialog.get_skip_only(
+            columns=list(self.dataset.df), skip=self.skip, only=self.only, parent=self
+        )
         self.skiponly_label.setText(text)
 
     def update_types(self):
@@ -232,11 +267,17 @@ class RecodeValuesDialog(QDialog):
         return None
 
     def submit(self):
-        type_errors = self.update_types()  # Convert the types of 'from' and 'to', returning None if successful
-        if self.data_name is not None and self.data_name in [d.name for d in self.appctx.datasets]:
-            warnings.show_warning("Dataset already exists",
-                                  f"A dataset named '{self.data_name}' already exists.\n"
-                                  f"Use a different name or clear the dataset name field.")
+        type_errors = (
+            self.update_types()
+        )  # Convert the types of 'from' and 'to', returning None if successful
+        if self.data_name is not None and self.data_name in [
+            d.name for d in self.appctx.datasets
+        ]:
+            warnings.show_warning(
+                "Dataset already exists",
+                f"A dataset named '{self.data_name}' already exists.\n"
+                f"Use a different name or clear the dataset name field.",
+            )
         elif type_errors is not None:
             warnings.show_critical("Error", type_errors)
         else:
@@ -245,9 +286,11 @@ class RecodeValuesDialog(QDialog):
                 slot = self.appctx.update_data
             else:
                 slot = self.appctx.add_dataset
-            RunProgress.run_with_progress(progress_str="Recoding variables...",
-                                          function=self.get_func(),
-                                          slot=slot,
-                                          parent=self)
+            RunProgress.run_with_progress(
+                progress_str="Recoding variables...",
+                function=self.get_func(),
+                slot=slot,
+                parent=self,
+            )
             self.log_command()
             self.accept()

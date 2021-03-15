@@ -116,7 +116,8 @@ class EWASDialog(QDialog):
             f"covariates={repr(self.covariates)}, "
             f"data={old_data_name}, "
             f"{'regression_kind=' + self.regression_kind + ', ' if self.regression_kind is not None else ''}"
-            f"survey_design_spec={repr(sds_name)}, " f"min_n={self.min_n})",
+            f"survey_design_spec={repr(sds_name)}, "
+            f"min_n={self.min_n})",
         )
 
     def setup_ui(self):
