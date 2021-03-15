@@ -112,3 +112,4 @@ Pipfile.lock
 
 # Build
 /build
+main.spec
