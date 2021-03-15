@@ -1,8 +1,18 @@
 import clarite
 import pandas as pd
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QDialog, QFormLayout, QDialogButtonBox, QLineEdit, QPushButton, \
-    QGroupBox, QSpinBox, QCheckBox, QComboBox, QFileDialog
+from PyQt5.QtWidgets import (
+    QDialog,
+    QFormLayout,
+    QDialogButtonBox,
+    QLineEdit,
+    QPushButton,
+    QGroupBox,
+    QSpinBox,
+    QCheckBox,
+    QComboBox,
+    QFileDialog,
+)
 
 from gui.models import Dataset
 from gui.widgets import SelectColumnDialog, SkipOnlyDialog
@@ -15,7 +25,8 @@ class EWASDialog(QDialog):
     """
 
     SINGLE_CLUSTER_OPTIONS = ["fail", "adjust", "average", "certainty"]
-    WEIGHT_TYPES = ['None', 'Single Weight', 'Specific Weights']
+    WEIGHT_TYPES = ["None", "Single Weight", "Specific Weights"]
+    BUILTIN_REGRESSION_KINDS = ["glm", "weighted_glm", "r_survey"]
 
     def __init__(self, *args, **kwargs):
         super(EWASDialog, self).__init__(*args, **kwargs)
@@ -23,9 +34,10 @@ class EWASDialog(QDialog):
         self.dataset = self.appctx.datasets[self.appctx.current_dataset_idx]
         self.data_name = None
         # EWAS params
-        self.phenotype = None
+        self.outcome = None
         self.covariates = []
         self.min_n = 200
+        self.regression_kind = "glm"
         self.use_survey = False
         # Survey Params
         self.survey_df = None
@@ -48,59 +60,64 @@ class EWASDialog(QDialog):
             data_name = self.data_name
 
         # EWAS parameters
-        data = self.dataset.df
-        phenotype = self.phenotype
-        covariates = self.covariates
-        min_n = self.min_n
+        kwargs = {
+            "outcome": self.outcome,
+            "covariates": self.covariates,
+            "data": self.dataset.df,
+            "regression_kind": self.regression_kind,
+            "min_n": self.min_n,
+        }
 
         # Survey Parameters
         if self.use_survey:
-            sds = clarite.survey.SurveyDesignSpec(survey_df=self.survey_df.df,
-                                                  strata=self.strata,
-                                                  cluster=self.cluster,
-                                                  nest=self.nest,
-                                                  fpc=self.fpc,
-                                                  weights=self.weights,
-                                                  single_cluster=self.single_cluster,
-                                                  drop_unweighted=self.drop_unweighted)
-        else:
-            sds = None
+            kwargs["survey_design_spec"] = clarite.survey.SurveyDesignSpec(
+                survey_df=self.survey_df.df,
+                strata=self.strata,
+                cluster=self.cluster,
+                nest=self.nest,
+                fpc=self.fpc,
+                weights=self.weights,
+                single_cluster=self.single_cluster,
+                drop_unweighted=self.drop_unweighted,
+            )
 
         def f():
-            result = clarite.analyze.ewas(phenotype=phenotype,
-                                          covariates=covariates,
-                                          data=data,
-                                          survey_design_spec=sds,
-                                          min_n=min_n)
-            return Dataset(data_name, 'ewas_result', result)
+            result = clarite.analyze.ewas(**kwargs)
+            return Dataset(data_name, "ewas_result", result)
 
         return f
 
     def log_command(self):
         old_data_name = self.dataset.get_python_name()  # Original selected data
-        new_data_name = self.appctx.datasets[self.appctx.current_dataset_idx].get_python_name()  # New selected data
+        new_data_name = self.appctx.datasets[
+            self.appctx.current_dataset_idx
+        ].get_python_name()  # New selected data
         # Log Survey Design
         if self.use_survey:
             survey_df_name = self.survey_df.get_python_name()
             sds_name = f"survey_{old_data_name}"
-            self.appctx.log_python(f"{sds_name} = clarite.survey.SurveyDesignSpec("
-                                   f"survey_df={survey_df_name}, "
-                                   f"strata={repr(self.strata)}, "
-                                   f"cluster={repr(self.cluster)}, "
-                                   f"nest={repr(self.nest)}, "
-                                   f"fpc={repr(self.fpc)}, "
-                                   f"weights={repr(self.weights)}, "
-                                   f"single_cluster={repr(self.single_cluster)},"
-                                   f"drop_unweighted={repr(self.drop_unweighted)})")
+            self.appctx.log_python(
+                f"{sds_name} = clarite.survey.SurveyDesignSpec("
+                f"survey_df={survey_df_name}, "
+                f"strata={repr(self.strata)}, "
+                f"cluster={repr(self.cluster)}, "
+                f"nest={repr(self.nest)}, "
+                f"fpc={repr(self.fpc)}, "
+                f"weights={repr(self.weights)}, "
+                f"single_cluster={repr(self.single_cluster)},"
+                f"drop_unweighted={repr(self.drop_unweighted)})"
+            )
         else:
             sds_name = None
         # Log EWAS
-        self.appctx.log_python(f"{new_data_name} = clarite.analyze.ewas("
-                               f"phenotype={repr(self.phenotype)}, "
-                               f"covariates={repr(self.covariates)}, "
-                               f"data={old_data_name}, "
-                               f"survey_design_spec={repr(sds_name)}, "
-                               f"min_n={self.min_n})")
+        self.appctx.log_python(
+            f"{new_data_name} = clarite.analyze.ewas("
+            f"outcome={repr(self.outcome)}, "
+            f"covariates={repr(self.covariates)}, "
+            f"data={old_data_name}, "
+            f"{'regression_kind=' + self.regression_kind + ', ' if self.regression_kind is not None else ''}"
+            f"survey_design_spec={repr(sds_name)}, " f"min_n={self.min_n})",
+        )
 
     def setup_ui(self):
         self.setWindowTitle(f"EWAS")
@@ -117,10 +134,10 @@ class EWASDialog(QDialog):
         self.le_data_name.textChanged.connect(self.update_data_name)
         layout.addRow("Save Dataset Name: ", self.le_data_name)
 
-        # Phenotype
-        self.phenotype_btn = QPushButton("Not Set", parent=self)
-        self.phenotype_btn.clicked.connect(self.launch_get_phenotype)
-        layout.addRow("Phenotype", self.phenotype_btn)
+        # Outcome
+        self.outcome_btn = QPushButton("Not Set", parent=self)
+        self.outcome_btn.clicked.connect(self.launch_get_outcome)
+        layout.addRow("Outcome", self.outcome_btn)
 
         # Covariates
         self.covariates_btn = QPushButton("None", parent=self)
@@ -134,11 +151,14 @@ class EWASDialog(QDialog):
         self.min_n_sb.valueChanged.connect(self.update_min_n)
         layout.addRow("Minimum valid samples", self.min_n_sb)
 
-        # Use Survey
-        # Checkbox
-        self.use_survey_checkbox = QCheckBox(self)
-        self.use_survey_checkbox.stateChanged.connect(self.update_use_survey)
-        layout.addRow("Use Survey Information", self.use_survey_checkbox)
+        # Regression Kind
+        self.regression_kind_combobox = QComboBox(self)
+        for rk in self.BUILTIN_REGRESSION_KINDS:
+            self.regression_kind_combobox.addItem(rk)
+        self.regression_kind_combobox.currentIndexChanged.connect(
+            lambda idx: self.update_regression_kind(idx)
+        )
+        layout.addRow("Regression Kind", self.regression_kind_combobox)
 
         #############################
         # Survey Settings Group Box #
@@ -151,9 +171,11 @@ class EWASDialog(QDialog):
 
         # Survey df - select a dataset that has been loaded
         self.survey_df_combobox = QComboBox(self)
-        for data in [d for d in self.appctx.datasets if d.kind == 'dataset']:
+        for data in [d for d in self.appctx.datasets if d.kind == "dataset"]:
             self.survey_df_combobox.addItem(data.name)
-        self.survey_df_combobox.currentIndexChanged.connect(lambda idx: self.update_survey_df(idx))
+        self.survey_df_combobox.currentIndexChanged.connect(
+            lambda idx: self.update_survey_df(idx)
+        )
         survey_setting_layout.addRow("Survey Data", self.survey_df_combobox)
 
         # Strata - pick a column from the survey df
@@ -181,33 +203,45 @@ class EWASDialog(QDialog):
         self.weight_method_combobox = QComboBox(self)
         for option in self.WEIGHT_TYPES:
             self.weight_method_combobox.addItem(option)
-        self.weight_method_combobox.currentIndexChanged.connect(lambda idx: self.update_weight_type(idx))
+        self.weight_method_combobox.currentIndexChanged.connect(
+            lambda idx: self.update_weight_type(idx)
+        )
         survey_setting_layout.addRow("Survey Weights", self.weight_method_combobox)
 
         # Weights - Single
         self.weight_single_btn = QPushButton("Not Set", parent=self)
         self.weight_single_btn.clicked.connect(self.launch_get_weight_single)
-        self.weight_single_btn.setEnabled(False)  # Disabled b/c weight type is None by default
+        self.weight_single_btn.setEnabled(
+            False
+        )  # Disabled b/c weight type is None by default
         survey_setting_layout.addRow("\tSingle Weight", self.weight_single_btn)
 
         # Weights - Specific
         self.weight_specific_btn = QPushButton("Not Set", parent=self)
         self.weight_specific_btn.clicked.connect(self.launch_get_weight_specific)
-        self.weight_specific_btn.setEnabled(False)  # Disabled b/c weight type is None by default
+        self.weight_specific_btn.setEnabled(
+            False
+        )  # Disabled b/c weight type is None by default
         survey_setting_layout.addRow("\tSpecific Weight", self.weight_specific_btn)
 
         # Drop Unweighted
         self.drop_unweighted_checkbox = QCheckBox(self)
         self.drop_unweighted_checkbox.setChecked(False)
         self.drop_unweighted_checkbox.stateChanged.connect(self.update_drop_unweighted)
-        survey_setting_layout.addRow("Drop unweighted observations", self.drop_unweighted_checkbox)
+        survey_setting_layout.addRow(
+            "Drop unweighted observations", self.drop_unweighted_checkbox
+        )
 
         # Single Cluster Dropdown
         self.single_cluster_combobox = QComboBox(self)
         for option in self.SINGLE_CLUSTER_OPTIONS:
             self.single_cluster_combobox.addItem(option)
-        self.single_cluster_combobox.currentIndexChanged.connect(lambda idx: self.update_single_cluster(idx))
-        survey_setting_layout.addRow("Single Cluster Handling", self.single_cluster_combobox)
+        self.single_cluster_combobox.currentIndexChanged.connect(
+            lambda idx: self.update_single_cluster(idx)
+        )
+        survey_setting_layout.addRow(
+            "Single Cluster Handling", self.single_cluster_combobox
+        )
 
         # Ok/Cancel
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
@@ -228,37 +262,42 @@ class EWASDialog(QDialog):
             self.data_name = text
 
     def submit(self):
-        if self.data_name is not None and self.data_name in [d.name for d in self.appctx.datasets]:
-            show_warning("Dataset already exists",
-                         f"A dataset named '{self.data_name}' already exists.\n"
-                         f"Use a different name or clear the dataset name field.")
-        elif self.phenotype is None:
+        if self.data_name is not None and self.data_name in [
+            d.name for d in self.appctx.datasets
+        ]:
+            show_warning(
+                "Dataset already exists",
+                f"A dataset named '{self.data_name}' already exists.\n"
+                f"Use a different name or clear the dataset name field.",
+            )
+        elif self.outcome is None:
             show_warning("Missing Parameter", "A phenotype must be selected")
         else:
             print(f"Running EWAS...")
             # Run with a progress dialog
-            RunProgress.run_with_progress(progress_str="Running EWAS...",
-                                          function=self.get_func(),
-                                          slot=self.appctx.add_dataset,
-                                          parent=self)
+            RunProgress.run_with_progress(
+                progress_str="Running EWAS...",
+                function=self.get_func(),
+                slot=self.appctx.add_dataset,
+                parent=self,
+            )
             self.log_command()
             self.accept()
 
-    def launch_get_phenotype(self):
+    def launch_get_outcome(self):
         """Launch a dialog to set the phenotype"""
-        phenotype = SelectColumnDialog.get_column(columns=list(self.dataset.df),
-                                                  selected=self.phenotype,
-                                                  parent=self)
+        phenotype = SelectColumnDialog.get_column(
+            columns=list(self.dataset.df), selected=self.outcome, parent=self
+        )
         if phenotype is not None:
-            self.phenotype = phenotype
-            self.phenotype_btn.setText(f"{self.phenotype}")
+            self.outcome = phenotype
+            self.outcome_btn.setText(f"{self.outcome}")
 
     def launch_get_covariates(self):
         """Launch a dialog to set the covariates"""
-        _, skip, only = SkipOnlyDialog.get_skip_only(columns=list(self.dataset.df),
-                                                     skip=None,
-                                                     only=self.covariates,
-                                                     parent=self)
+        _, skip, only = SkipOnlyDialog.get_skip_only(
+            columns=list(self.dataset.df), skip=None, only=self.covariates, parent=self
+        )
         if skip is not None:
             self.covariates = [v for v in list(self.dataset.df) if v not in skip]
         elif only is not None:
@@ -276,14 +315,15 @@ class EWASDialog(QDialog):
     def update_min_n(self, value):
         self.min_n = value
 
-    def update_use_survey(self):
-        self.use_survey = self.use_survey_checkbox.isChecked()
+    def update_regression_kind(self, idx):
+        self.regression_kind = self.BUILTIN_REGRESSION_KINDS[idx]
+        self.use_survey = self.regression_kind in ["weighted_glm", "r_survey"]
         self.survey_setting_group.setHidden(not self.use_survey)
         self.adjustSize()
 
     @pyqtSlot(int)
     def update_survey_df(self, idx):
-        datasets = [d for d in self.appctx.datasets if d.kind == 'dataset']
+        datasets = [d for d in self.appctx.datasets if d.kind == "dataset"]
         self.survey_df = datasets[idx]
         # Reset Strata
         self.strata = None
@@ -297,18 +337,18 @@ class EWASDialog(QDialog):
 
     def launch_get_strata(self):
         """Launch a dialog to set the strata column from the survey df"""
-        strata = SelectColumnDialog.get_column(columns=list(self.survey_df.df),
-                                               selected=self.strata,
-                                               parent=self)
+        strata = SelectColumnDialog.get_column(
+            columns=list(self.survey_df.df), selected=self.strata, parent=self
+        )
         if strata is not None:
             self.strata = strata
             self.strata_btn.setText(f"{self.strata}")
 
     def launch_get_cluster(self):
         """Launch a dialog to set the cluster column from the survey df"""
-        cluster = SelectColumnDialog.get_column(columns=list(self.survey_df.df),
-                                                selected=self.cluster,
-                                                parent=self)
+        cluster = SelectColumnDialog.get_column(
+            columns=list(self.survey_df.df), selected=self.cluster, parent=self
+        )
         if cluster is not None:
             self.cluster = cluster
             self.cluster_btn.setText(f"{self.cluster}")
@@ -319,9 +359,9 @@ class EWASDialog(QDialog):
 
     def launch_get_fpc(self):
         """Launch a dialog to set the fpc column from the survey df"""
-        fpc = SelectColumnDialog.get_column(columns=list(self.survey_df.df),
-                                            selected=self.fpc,
-                                            parent=self)
+        fpc = SelectColumnDialog.get_column(
+            columns=list(self.survey_df.df), selected=self.fpc, parent=self
+        )
         if fpc is not None:
             self.fpc = fpc
             self.fpc_btn.setText(f"{self.fpc}")
@@ -353,9 +393,9 @@ class EWASDialog(QDialog):
 
     def launch_get_weight_single(self):
         """Launch a dialog to set the single weight variable"""
-        selected_variable = SelectColumnDialog.get_column(columns=list(self.survey_df.df),
-                                                          selected=None,
-                                                          parent=self)
+        selected_variable = SelectColumnDialog.get_column(
+            columns=list(self.survey_df.df), selected=None, parent=self
+        )
         if selected_variable is not None:
             self.weights = selected_variable
             self.weight_single_btn.setText(f"{self.weights}")
@@ -364,11 +404,13 @@ class EWASDialog(QDialog):
         """Launch a dialog to load a file matching variables to weights"""
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        filename, _ = QFileDialog.getOpenFileName(self,
-                                                  f"Load Specific Weights File",
-                                                  "",
-                                                  f"TSV Files (*.tsv *.txt)",
-                                                  options=options)
+        filename, _ = QFileDialog.getOpenFileName(
+            self,
+            f"Load Specific Weights File",
+            "",
+            f"TSV Files (*.tsv *.txt)",
+            options=options,
+        )
         # Set filename
         if len(filename) == 0:
             return
@@ -382,46 +424,64 @@ class EWASDialog(QDialog):
 
         # Must have two columns
         if len(list(weights)) != 2:
-            show_warning("Specific Weights File Error", f"Expected 2 columns, found {len(list(weights)):,} columns")
+            show_warning(
+                "Specific Weights File Error",
+                f"Expected 2 columns, found {len(list(weights)):,} columns",
+            )
             return
 
         # Set columns and convert to a dictionary
-        weights.columns = ['variable', 'weight']
-        weights = weights.set_index('variable')
-        weights = weights.to_dict()['weight']
+        weights.columns = ["variable", "weight"]
+        weights = weights.set_index("variable")
+        weights = weights.to_dict()["weight"]
 
         # Check that some variables/weights matched
         unique_vars = len(set(weights.keys()) & set(list(self.dataset.df)))
         unique_weights = len(set(weights.values()) & set(list(self.survey_df.df)))
-        missing_weights = set(list(self.dataset.df)) - set(weights.keys()) - set(weights.values()) -\
-                          set(self.covariates) - {self.phenotype, self.cluster, self.strata, self.fpc}
+        missing_weights = (
+            set(list(self.dataset.df))
+            - set(weights.keys())
+            - set(weights.values())
+            - set(self.covariates)
+            - {self.outcome, self.cluster, self.strata, self.fpc}
+        )
         if unique_vars < 1:
-            show_warning("Specific Weights File Error",
-                         f"Loaded {filename}\n"
-                         "No variables matched columns in the input data.\n\n"
-                         "The first column of the specific weights file must list variable names and "
-                         "a header line must be present.")
+            show_warning(
+                "Specific Weights File Error",
+                f"Loaded {filename}\n"
+                "No variables matched columns in the input data.\n\n"
+                "The first column of the specific weights file must list variable names and "
+                "a header line must be present.",
+            )
         elif unique_weights < 1:
-            show_warning("Specific Weights File Error",
-                         f"Loaded {filename}\n"
-                         "No weights matched columns in the survey data.\n\n"
-                         "The second column of the specific weights file must list weight names and "
-                         "a header line must be present.")
+            show_warning(
+                "Specific Weights File Error",
+                f"Loaded {filename}\n"
+                "No weights matched columns in the survey data.\n\n"
+                "The second column of the specific weights file must list weight names and "
+                "a header line must be present.",
+            )
         elif len(missing_weights) > 0 and len(missing_weights) <= 5:
-            show_warning("Specific Weights File Error",
-                         f"Loaded {filename}\n"
-                         "Some variables are missing weights:\n\n"
-                         f"{', '.join(sorted(list(missing_weights)))}")
+            show_warning(
+                "Specific Weights File Error",
+                f"Loaded {filename}\n"
+                "Some variables are missing weights:\n\n"
+                f"{', '.join(sorted(list(missing_weights)))}",
+            )
         elif len(missing_weights) > 5:
-            show_warning("Specific Weights File Error",
-                         f"Loaded {filename}\n"
-                         "More than 5 variables are missing weights, including:\n\n"
-                         f"{', '.join(sorted(list(missing_weights))[:5])}")
+            show_warning(
+                "Specific Weights File Error",
+                f"Loaded {filename}\n"
+                "More than 5 variables are missing weights, including:\n\n"
+                f"{', '.join(sorted(list(missing_weights))[:5])}",
+            )
         else:
             self.weights = weights
-            self.weight_specific_btn.setText(f"{unique_weights:,} different weights "
-                                             f"assigned to {unique_vars:,} variables")
-            
+            self.weight_specific_btn.setText(
+                f"{unique_weights:,} different weights "
+                f"assigned to {unique_vars:,} variables"
+            )
+
     def update_drop_unweighted(self):
         """Update the nest parameter to match the checkbox"""
         self.drop_unweighted = self.drop_unweighted_checkbox.isChecked()
