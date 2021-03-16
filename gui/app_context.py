@@ -16,7 +16,7 @@ class AppContext:
     Each method that modifies data emits a signal with the same name to update the UI.
     """
 
-    VERSION = "1.0.0"
+    VERSION = "1.2.0"
     ORG = "Hall Lab"
     APPLICATION = "Clarite"
 
