@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (
     QSpinBox,
     QCheckBox,
     QComboBox,
-    QFileDialog,
+    QFileDialog, QHBoxLayout, QLabel,
 )
 
 from gui.models import Dataset
@@ -92,6 +92,13 @@ class EWASDialog(QDialog):
         new_data_name = self.appctx.datasets[
             self.appctx.current_dataset_idx
         ].get_python_name()  # New selected data
+        python_cmd_args = {
+            "outcome": repr(self.outcome),
+            "covariates": repr(self.covariates),
+            "data": old_data_name,
+            "regression_kind": repr(self.regression_kind),
+            "min_n": self.min_n
+        }
         # Log Survey Design
         if self.use_survey:
             survey_df_name = self.survey_df.get_python_name()
@@ -107,17 +114,12 @@ class EWASDialog(QDialog):
                 f"single_cluster={repr(self.single_cluster)},"
                 f"drop_unweighted={repr(self.drop_unweighted)})"
             )
-        else:
-            sds_name = None
+            python_cmd_args["survey_design_spec"] = sds_name
         # Log EWAS
         self.appctx.log_python(
-            f"{new_data_name} = clarite.analyze.ewas("
-            f"outcome={repr(self.outcome)}, "
-            f"covariates={repr(self.covariates)}, "
-            f"data={old_data_name}, "
-            f"{'regression_kind=' + self.regression_kind + ', ' if self.regression_kind is not None else ''}"
-            f"survey_design_spec={repr(sds_name)}, "
-            f"min_n={self.min_n})",
+            f"{new_data_name} = clarite.analyze.ewas(" +
+            ", ".join([f"{k}={v}" for k,v in python_cmd_args.items()]) +
+            ")"
         )
 
     def setup_ui(self):
@@ -153,13 +155,27 @@ class EWASDialog(QDialog):
         layout.addRow("Minimum valid samples", self.min_n_sb)
 
         # Regression Kind
+        # Note: Some methods must use survey, for others it is optional.
+        regression_kind_layout = QHBoxLayout()
+        # Combobox to select the regression kind, initially 'glm'
         self.regression_kind_combobox = QComboBox(self)
         for rk in self.BUILTIN_REGRESSION_KINDS:
             self.regression_kind_combobox.addItem(rk)
         self.regression_kind_combobox.currentIndexChanged.connect(
             lambda idx: self.update_regression_kind(idx)
         )
-        layout.addRow("Regression Kind", self.regression_kind_combobox)
+        regression_kind_layout.addWidget(self.regression_kind_combobox)
+        # Space
+        regression_kind_layout.addStretch()
+        # Checkbox to enable/disable use of survey info when optional for the kind,
+        # initially unchecked and disabled b/c 'glm' is selected
+        self.use_survey_cb = QCheckBox(self)
+        self.use_survey_cb.setChecked(self.use_survey)
+        self.use_survey_cb.setDisabled(True)
+        self.use_survey_cb.stateChanged.connect(self.update_use_survey)
+        regression_kind_layout.addWidget(self.use_survey_cb)
+        regression_kind_layout.addWidget(QLabel("Use Survey Information"))
+        layout.addRow("Regression Kind", regression_kind_layout)
 
         #############################
         # Survey Settings Group Box #
@@ -318,7 +334,20 @@ class EWASDialog(QDialog):
 
     def update_regression_kind(self, idx):
         self.regression_kind = self.BUILTIN_REGRESSION_KINDS[idx]
-        self.use_survey = self.regression_kind in ["weighted_glm", "r_survey"]
+        # Must use survey if using weighted_glm
+        if self.regression_kind == "glm":
+            self.use_survey_cb.setChecked(False)
+            self.use_survey_cb.setDisabled(True)
+        elif self.regression_kind == "weighted_glm":
+            self.use_survey_cb.setChecked(True)
+            self.use_survey_cb.setDisabled(True)
+        else:
+            self.use_survey_cb.setDisabled(False)
+        self.survey_setting_group.setHidden(not self.use_survey)
+        self.adjustSize()
+
+    def update_use_survey(self):
+        self.use_survey = not self.use_survey
         self.survey_setting_group.setHidden(not self.use_survey)
         self.adjustSize()
 
