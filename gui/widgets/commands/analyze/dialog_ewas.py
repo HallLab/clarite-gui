@@ -11,7 +11,9 @@ from PyQt5.QtWidgets import (
     QSpinBox,
     QCheckBox,
     QComboBox,
-    QFileDialog, QHBoxLayout, QLabel,
+    QFileDialog,
+    QHBoxLayout,
+    QLabel,
 )
 
 from gui.models import Dataset
@@ -97,7 +99,7 @@ class EWASDialog(QDialog):
             "covariates": repr(self.covariates),
             "data": old_data_name,
             "regression_kind": repr(self.regression_kind),
-            "min_n": self.min_n
+            "min_n": self.min_n,
         }
         # Log Survey Design
         if self.use_survey:
@@ -117,9 +119,9 @@ class EWASDialog(QDialog):
             python_cmd_args["survey_design_spec"] = sds_name
         # Log EWAS
         self.appctx.log_python(
-            f"{new_data_name} = clarite.analyze.ewas(" +
-            ", ".join([f"{k}={v}" for k,v in python_cmd_args.items()]) +
-            ")"
+            f"{new_data_name} = clarite.analyze.ewas("
+            + ", ".join([f"{k}={v}" for k, v in python_cmd_args.items()])
+            + ")"
         )
 
     def setup_ui(self):

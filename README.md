@@ -26,8 +26,25 @@ Full documentation on [ReadTheDocs.io](https://clarite-gui.readthedocs.io/en/sta
 4. Run:
 
     ``pipenv run python main.py``
+    
+## Using the 'r_survey' regression method in 'ewas'
+
+This will currently raise an error "signal only works in main thread".
+This should be resolved when [this pull request](https://github.com/rpy2/rpy2/pull/780) is merged into rpy2
 
 Executables will be provided for future releases.
+
+## Build Notes
+
+### Windows
+
+pipenv run pyinstaller -F --name=CLARITE --icon=clarite_logo.ico main.py
+./dist/CLARITE.exe
+
+### Mac
+
+pipenv run pyinstaller -F --name=CLARITE --icon=clarite_logo.ico --hidden-import cmath --windowed main.py
+./dist/CLARITE
 
 ## Citing CLARITE
 
