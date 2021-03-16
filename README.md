@@ -10,9 +10,10 @@ A GUI Version of CLARITE
 
 Full documentation on [ReadTheDocs.io](https://clarite-gui.readthedocs.io/en/stable/)
 
-*NOTE*: Update resources with `pyrcc -o gui/resources/app_resources.py gui/resources/app_resources.qrc`
-
 ## Running
+Executables are [available under releases](https://github.com/HallLab/clarite-gui/releases).
+
+To run using python:
 
 1. Download or clone this repository and enter the folder
 2. Ensure pipenv is installed
@@ -27,12 +28,14 @@ Full documentation on [ReadTheDocs.io](https://clarite-gui.readthedocs.io/en/sta
 
     ``pipenv run python main.py``
     
-## Using the 'r_survey' regression method in 'ewas'
+## Known Issues
 
-This will currently raise an error "signal only works in main thread".
-This should be resolved when [this pull request](https://github.com/rpy2/rpy2/pull/780) is merged into rpy2
-
-Executables will be provided for future releases.
+* Using the 'r_survey' regression method in 'ewas'
+  * This will currently raise an error "signal only works in main thread". This should be resolved when [this pull request](https://github.com/rpy2/rpy2/pull/780) is merged into rpy2
+* Build not available for MacOS
+   * Due to Big Sur difficulties, which may be resolved in a future version of PyInstaller
+* Statsmodels/PyInstaller incompatibility
+    * Will be fixed in the next release of PyInstaller due to a new hook for statsmodels
 
 ## Build Notes
 
@@ -41,10 +44,10 @@ Executables will be provided for future releases.
 pipenv run pyinstaller -F --name=CLARITE --icon=clarite_logo.ico main.py
 ./dist/CLARITE.exe
 
-### Mac
+### Mac - Currently broken on Big Sur
 
 pipenv run pyinstaller -F --name=CLARITE --icon=clarite_logo.ico --hidden-import cmath --windowed main.py
-./dist/CLARITE
+open ./dist/CLARITE.app
 
 ## Citing CLARITE
 
